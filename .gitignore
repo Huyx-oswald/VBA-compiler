@@ -1,0 +1,11 @@
+# 构建产物 / Build outputs (reproducible via build.vbs — do not commit)
+FinanceRPA.xlam
+FinanceRPA_temp.xlsm
+FinanceRPA安装包/
+_build_gbk/
+
+# 临时导出 / scratch
+tmp_export/
+
+# Office 临时锁文件
+~$*

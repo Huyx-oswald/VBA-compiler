@@ -13,24 +13,24 @@ Sub AutoSetupToolbar()
     Err.Clear
 
     Set btn = cb.Controls.Add(1)
-    btn.Caption = "¿â´æ¼ÛÖµ±íÇåÏ´"
-    btn.OnAction = "¿â´æ¼ÛÖµ±íÊı¾İÇåÏ´"
+    btn.Caption = "åº“å­˜ä»·å€¼è¡¨æ¸…æ´—"
+    btn.OnAction = "åº“å­˜ä»·å€¼è¡¨æ•°æ®æ¸…æ´—"
     btn.Style = 3
     btn.FaceId = 210
     btn.Width = 120
     Err.Clear
 
     Set btn = cb.Controls.Add(1)
-    btn.Caption = "¿âÁä±íÇåÏ´"
-    btn.OnAction = "ÇåÏ´¿âÁä±íÊı¾İ"
+    btn.Caption = "åº“é¾„è¡¨æ¸…æ´—"
+    btn.OnAction = "æ¸…æ´—åº“é¾„è¡¨æ•°æ®"
     btn.Style = 3
     btn.FaceId = 210
     btn.Width = 120
     Err.Clear
 
     Set btn = cb.Controls.Add(1)
-    btn.Caption = "¿âÁäÆÚ³õ±ä»¯·ÖÎö"
-    btn.OnAction = "¿âÁä±íÆÚ³õ±ä»¯·ÖÎö"
+    btn.Caption = "åº“é¾„æœŸåˆå˜åŒ–åˆ†æ"
+    btn.OnAction = "åº“é¾„è¡¨æœŸåˆå˜åŒ–åˆ†æ"
     btn.Style = 3
     btn.FaceId = 129
     btn.Width = 120
@@ -38,15 +38,15 @@ Sub AutoSetupToolbar()
     Err.Clear
 
     Set btn = cb.Controls.Add(1)
-    btn.Caption = "²É¹º·¢Æ±ÇåÏ´"
-    btn.OnAction = "²É¹º·¢Æ±ĞÅÏ¢Êı¾İÇåÏ´"
+    btn.Caption = "é‡‡è´­å‘ç¥¨æ¸…æ´—"
+    btn.OnAction = "é‡‡è´­å‘ç¥¨ä¿¡æ¯æ•°æ®æ¸…æ´—"
     btn.Style = 3
     btn.FaceId = 210
     btn.Width = 120
     Err.Clear
 
     Set btn = cb.Controls.Add(1)
-    btn.Caption = "¹Ì¶¨×Ê²úÒş²ØÁĞ"
+    btn.Caption = "å›ºå®šèµ„äº§éšè—åˆ—"
     btn.OnAction = "btnHideFixedAssetColumns"
     btn.Style = 3
     btn.FaceId = 210
@@ -55,7 +55,7 @@ Sub AutoSetupToolbar()
     Err.Clear
 
     Set btn = cb.Controls.Add(1)
-    btn.Caption = "¹ØÓÚ"
+    btn.Caption = "å…³äº"
     btn.OnAction = "OnBtnAbout"
     btn.Style = 3
     btn.FaceId = 487
@@ -68,13 +68,13 @@ Sub AutoSetupToolbar()
 End Sub
 
 Sub OnBtnAbout()
-    MsgBox "²ÆÎñRPA ¼ÓÔØºê v1.0" & vbCrLf & vbCrLf & _
-           "¹¦ÄÜÄ£¿é£º" & vbCrLf & _
-           "  - ¿â´æ¼ÛÖµ±íÇåÏ´" & vbCrLf & _
-           "  - ¿âÁä±íÇåÏ´" & vbCrLf & _
-           "  - ¿âÁäÆÚ³õ±ä»¯·ÖÎö" & vbCrLf & _
-           "  - ²É¹º·¢Æ±ÇåÏ´" & vbCrLf & _
-           "  - ¹Ì¶¨×Ê²úÒş²ØÁĞ" & vbCrLf & vbCrLf & _
-           "Î¬»¤£º±à¼­ src/*.bas ¡ú ¹Ø±ÕWPS ¡ú ÔËĞĞ build.vbs", _
-           vbInformation, "¹ØÓÚ ²ÆÎñRPA"
+    MsgBox "è´¢åŠ¡RPA åŠ è½½å® v1.0" & vbCrLf & vbCrLf & _
+           "åŠŸèƒ½æ¨¡å—ï¼š" & vbCrLf & _
+           "  - åº“å­˜ä»·å€¼è¡¨æ¸…æ´—" & vbCrLf & _
+           "  - åº“é¾„è¡¨æ¸…æ´—" & vbCrLf & _
+           "  - åº“é¾„æœŸåˆå˜åŒ–åˆ†æ" & vbCrLf & _
+           "  - é‡‡è´­å‘ç¥¨æ¸…æ´—" & vbCrLf & _
+           "  - å›ºå®šèµ„äº§éšè—åˆ—" & vbCrLf & vbCrLf & _
+           "ç»´æŠ¤ï¼šç¼–è¾‘ src/*.bas â†’ å…³é—­WPS â†’ è¿è¡Œ build.vbs", _
+           vbInformation, "å…³äº è´¢åŠ¡RPA"
 End Sub

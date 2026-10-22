@@ -1,275 +1,223 @@
 Attribute VB_Name = "Module2"
-Sub ¿â´æ¼ÛÖµ±íÊı¾İÇåÏ´()
+' ============================================================
+' åº“å­˜ä»·å€¼è¡¨æ•°æ®æ¸…æ´—
+' è¾“å…¥ï¼šå½“å‰æ´»åŠ¨å·¥ä½œç°¿çš„ Sheet1ï¼ˆåº“å­˜ä»·å€¼è¡¨ SAP å¯¼å‡ºï¼Œ14 åˆ—ï¼‰
+' ä¼´ç”Ÿæ–‡ä»¶ï¼ˆè®°ä½å¼å®šä½ï¼Œè§ ModuleCommon.è§£æä¼´ç”Ÿæ–‡ä»¶ï¼‰ï¼š
+'   - ç‰©æ–™ç»„æ¨¡æ¿ï¼šcol1=ç‰©æ–™ç»„ç¼–ç  col2=ç‰©æ–™ç»„æ–‡æœ¬ï¼ˆæ— è¡¨å¤´ï¼Œé¦–è¡Œå³æ•°æ®ï¼‰
+'   - æœŸåˆåº“å­˜ä»·å€¼ï¼šcol2=ç‰©æ–™ col11=æ€»è®¡åº“å­˜ä»·å€¼
+' å¤„ç†ï¼šæ–°å¢ã€Œç‰©æ–™ç»„æ–‡æœ¬ã€ã€ŒæœŸåˆåº“å­˜ä»·å€¼ã€ã€Œåˆ†ç±»ã€ä¸‰åˆ—ï¼Œå¹¶æ´¾ç”ŸåŸææ–™é¡µ/æˆå“é¡µ
+' ============================================================
+Sub åº“å­˜ä»·å€¼è¡¨æ•°æ®æ¸…æ´—()
     Dim wb As Workbook
     Dim dataWS As Worksheet
     Dim lastRow As Long
     Dim i As Long
     Dim dict As Object
-    
-    ' Ê¹ÓÃ ActiveWorkbook ¶ø²»ÊÇ ThisWorkbook
-    ' ÕâÑù»á´¦Àíµ±Ç°»î¶¯µÄ¹¤×÷²¾£¬¶ø²»ÊÇ°üº¬VBA´úÂëµÄ¹¤×÷²¾
-    Set wb = ActiveWorkbook
-    
-    ' È·ÈÏÓÃ»§Òª´¦ÀíµÄ¹¤×÷²¾
+    Dim errMsg As String
+    Dim firstChar As String
     Dim response As VbMsgBoxResult
-    response = MsgBox("¼´½«´¦Àí¹¤×÷²¾: " & wb.Name & vbCrLf & _
-                     "ÊÇ·ñ¼ÌĞø£¿", vbYesNo + vbQuestion, "È·ÈÏ¹¤×÷²¾")
-    
+
+    Set wb = ActiveWorkbook
+
+    ' ç¡®è®¤å¤„ç†çš„å·¥ä½œç°¿
+    response = MsgBox("å³å°†å¤„ç†å·¥ä½œç°¿: " & wb.Name & vbCrLf & "æ˜¯å¦ç»§ç»­ï¼Ÿ", vbYesNo + vbQuestion, "ç¡®è®¤å·¥ä½œç°¿")
     If response = vbNo Then
-        MsgBox "²Ù×÷ÒÑÈ¡Ïû¡£"
+        MsgBox "æ“ä½œå·²å–æ¶ˆã€‚"
         Exit Sub
     End If
-    
-    ' ´´½¨×Öµä´æ´¢ÎïÁÏ×éÆ¥Åä¹ØÏµ
+
+    ' å®šä½ä¸»æ•°æ®è¡¨
+    Set dataWS = å–å·¥ä½œè¡¨(wb, "Sheet1")
+    If dataWS Is Nothing Then
+        MsgBox "é”™è¯¯ï¼šåœ¨å·¥ä½œç°¿ '" & wb.Name & "' ä¸­æ‰¾ä¸åˆ°åä¸º 'Sheet1' çš„å·¥ä½œè¡¨ã€‚", vbCritical, "ç¼ºå·¥ä½œè¡¨"
+        Exit Sub
+    End If
+
+    ' å¹‚ç­‰å®ˆå«ï¼šè‹¥å·²å«æ´¾ç”Ÿåˆ—è¡¨å¤´ï¼Œè¯´æ˜å¤„ç†è¿‡ï¼Œä¸­æ­¢ä»¥å…äºŒæ¬¡æ’åˆ—é”™ä½
+    If å·²å¤„ç†è¿‡(dataWS) Then
+        MsgBox "è¯¥è¡¨å·²æ¸…æ´—è¿‡ï¼ˆæ£€æµ‹åˆ°æ´¾ç”Ÿåˆ—ï¼‰ï¼Œè¯·ä½¿ç”¨åŸå§‹åº“å­˜ä»·å€¼è¡¨æ•°æ®åå†è¿è¡Œï¼", vbExclamation, "å·²å¤„ç†"
+        Exit Sub
+    End If
+
+    ' è¡¨å¤´å¿«ç…§æ ¡éªŒï¼ˆåœ¨æ’åˆ—å‰ï¼ŒæŒ‰åŸå§‹åˆ—ä½ç½®é”šå®šï¼Œä¸ç¬¦å³ä¸­æ­¢ï¼‰
+    errMsg = æ ¡éªŒè¡¨å¤´(dataWS, Array("B", "D"), Array("ç‰©æ–™", "ç‰©æ–™ç»„"))
+    If Len(errMsg) > 0 Then
+        MsgBox "è¡¨å¤´æ ¡éªŒæœªé€šè¿‡ï¼Œå·²ä¸­æ­¢ï¼ˆé¿å…è¯»é”™åˆ—ï¼‰ï¼š" & vbCrLf & errMsg, vbCritical, "è¡¨å¤´å¼‚å¸¸"
+        Exit Sub
+    End If
+
+    ' lastRow ä»¥ç‰©æ–™ç¼–ç ä¸»åˆ—(B)ä¸ºå”¯ä¸€åŸºå‡†ï¼Œåªæ±‚ä¸€æ¬¡ï¼Œåç»­å„æ®µå¤ç”¨
+    lastRow = dataWS.Cells(dataWS.Rows.Count, "B").End(xlUp).Row
+    If lastRow < 2 Then
+        MsgBox "é”™è¯¯ï¼šå·¥ä½œè¡¨ '" & dataWS.Name & "' ä¸­æ²¡æœ‰æ‰¾åˆ°è¶³å¤Ÿçš„æ•°æ®ã€‚", vbExclamation, "æ— æ•°æ®"
+        Exit Sub
+    End If
+
+    Application.ScreenUpdating = False
+
+    ' ---------- è½½å…¥ç‰©æ–™ç»„æ¨¡æ¿ ----------
     Set dict = CreateObject("Scripting.Dictionary")
-    
-    ' ¼ì²éÎïÁÏ×éÄ£°åÎÄ¼şÊÇ·ñ´æÔÚ
     Dim templateFilePath As String
-    templateFilePath = "C:\Users\Finance005\Desktop\111»ª¹¤Í¼ÏñÍ¬²½ÎÄ¼ş\4¡¢¸½±íºÍ¼ò±¨¿âÁä±í\¿âÁä±í\ÎïÁÏ×éÄ£°å.xlsx"
-    
-    If Dir(templateFilePath) = "" Then
-        MsgBox "´íÎó£ºÕÒ²»µ½ÎïÁÏ×éÄ£°åÎÄ¼ş 'ÎïÁÏ×éÄ£°å.xlsx'£¬ÇëÈ·±£ÎÄ¼şÔÚµ±Ç°Ä¿Â¼ÖĞ¡£"
+    templateFilePath = è§£æä¼´ç”Ÿæ–‡ä»¶("ç‰©æ–™ç»„æ¨¡æ¿", "ç‰©æ–™ç»„æ¨¡æ¿.xlsx", wb.Path)
+    If Len(templateFilePath) = 0 Then
+        Application.ScreenUpdating = True
         Exit Sub
     End If
-    
-    ' ´ò¿ªÎïÁÏ×éÄ£°åÎÄ¼ş²¢´´½¨Æ¥Åä×Öµä
+
     Dim templateWB As Workbook
     On Error Resume Next
-    Set templateWB = Workbooks.Open(templateFilePath)
-    If Err.Number <> 0 Then
-        MsgBox "´íÎó£ºÎŞ·¨´ò¿ªÎïÁÏ×éÄ£°åÎÄ¼ş£¬Çë¼ì²éÎÄ¼şÊÇ·ñ±»Õ¼ÓÃ»òËğ»µ¡£"
-        Err.Clear
+    Set templateWB = Workbooks.Open(templateFilePath, ReadOnly:=True)
+    On Error GoTo 0
+    If templateWB Is Nothing Then
+        Application.ScreenUpdating = True
+        MsgBox "é”™è¯¯ï¼šæ— æ³•æ‰“å¼€ç‰©æ–™ç»„æ¨¡æ¿æ–‡ä»¶ï¼Œè¯·æ£€æŸ¥æ˜¯å¦è¢«å ç”¨æˆ–æŸåã€‚" & vbCrLf & templateFilePath, vbCritical, "æ‰“å¼€å¤±è´¥"
         Exit Sub
     End If
-    On Error GoTo 0
-    
-    Dim templateWS As Worksheet
+
+    Dim templateWS As Worksheet, templateLastRow As Long
     Set templateWS = templateWB.Sheets(1)
-    
-    Dim templateLastRow As Long
     templateLastRow = templateWS.Cells(templateWS.Rows.Count, 1).End(xlUp).Row
-    
-    For i = 2 To templateLastRow
+    ' æ¨¡æ¿æ— è¡¨å¤´ï¼Œé¦–è¡Œå³æ•°æ® â†’ ä»ç¬¬ 1 è¡Œè¯»ï¼ˆæ—§ä»£ç ä»ç¬¬ 2 è¡Œèµ·ä¼šæ¼æ‰é¦–æ¡æ˜ å°„ï¼‰
+    For i = 1 To templateLastRow
         If Not IsEmpty(templateWS.Cells(i, 1)) And Not IsEmpty(templateWS.Cells(i, 2)) Then
-            dict(CStr(templateWS.Cells(i, 1).value)) = CStr(templateWS.Cells(i, 2).value)
+            dict(CStr(templateWS.Cells(i, 1).Value)) = CStr(templateWS.Cells(i, 2).Value)
         End If
     Next i
-    
     templateWB.Close SaveChanges:=False
-    
-    ' ¼ì²éÖ÷Êı¾İ±íÊÇ·ñ´æÔÚ
-    On Error Resume Next
-    Set dataWS = wb.Sheets("Sheet1")
-    On Error GoTo 0
-    
-    If dataWS Is Nothing Then
-        MsgBox "´íÎó£ºÔÚ¹¤×÷²¾ '" & wb.Name & "' ÖĞÕÒ²»µ½ÃûÎª 'Sheet1' µÄ¹¤×÷±í¡£" & vbCrLf & _
-               "ÇëÈ·ÈÏ¹¤×÷±íÃû³ÆÊÇ·ñÕıÈ·¡£"
-        Exit Sub
-    End If
-    
-    ' È·ÈÏÒª´¦ÀíµÄ¹¤×÷±í
-    response = MsgBox("¼´½«´¦Àí¹¤×÷±í: " & dataWS.Name & vbCrLf & _
-                     "ÊÇ·ñ¼ÌĞø£¿", vbYesNo + vbQuestion, "È·ÈÏ¹¤×÷±í")
-    
-    If response = vbNo Then
-        MsgBox "²Ù×÷ÒÑÈ¡Ïû¡£"
-        Exit Sub
-    End If
-    
-    lastRow = dataWS.Cells(dataWS.Rows.Count, "B").End(xlUp).Row
-    
-    If lastRow < 2 Then
-        MsgBox "´íÎó£º¹¤×÷±í '" & dataWS.Name & "' ÖĞÃ»ÓĞÕÒµ½×ã¹»µÄÊı¾İ¡£"
-        Exit Sub
-    End If
-    
-    ' 1. Ìí¼ÓÎïÁÏ×éÎÄ±¾ÁĞ£¨EÁĞÎïÁÏ×éºó£©
+
+    ' ---------- 1. æ–°å¢ç‰©æ–™ç»„æ–‡æœ¬åˆ—ï¼ˆEåˆ—ï¼Œç‰©æ–™ç»„åï¼‰----------
     dataWS.Cells(1, 5).EntireColumn.Insert
-    dataWS.Cells(1, 5) = "ÎïÁÏ×éÎÄ±¾"
-    
+    dataWS.Cells(1, 5) = "ç‰©æ–™ç»„æ–‡æœ¬"
+    Dim materialGroupCode As String, foundMatch As Boolean, key As Variant
     For i = 2 To lastRow
-        Dim materialGroupCode As String
-        materialGroupCode = CStr(dataWS.Cells(i, 4).value)
-        
+        materialGroupCode = CStr(dataWS.Cells(i, 4).Value)
         If dict.Exists(materialGroupCode) Then
             dataWS.Cells(i, 5) = dict(materialGroupCode)
         Else
-            Dim foundMatch As Boolean
             foundMatch = False
-            Dim key As Variant
             For Each key In dict.keys
-                If Left(materialGroupCode, Len(CStr(key))) = CStr(key) Then
-                    dataWS.Cells(i, 5) = dict(key)
-                    foundMatch = True
-                    Exit For
+                If Len(CStr(key)) > 0 Then
+                    If Left(materialGroupCode, Len(CStr(key))) = CStr(key) Then
+                        dataWS.Cells(i, 5) = dict(key)
+                        foundMatch = True
+                        Exit For
+                    End If
                 End If
             Next key
-            
-            If Not foundMatch Then
-                dataWS.Cells(i, 5) = "Î´ÕÒµ½Æ¥Åä"
-            End If
+            If Not foundMatch Then dataWS.Cells(i, 5) = "æœªæ‰¾åˆ°åŒ¹é…"
         End If
     Next i
-    
-    ' 2. Ìí¼ÓÆÚ³õ¿â´æ¼ÛÖµÁĞ
+
+    ' ---------- 2. æ–°å¢æœŸåˆåº“å­˜ä»·å€¼åˆ— ----------
     dataWS.Cells(1, 12).EntireColumn.Insert
-    dataWS.Cells(1, 12) = "ÆÚ³õ¿â´æ¼ÛÖµ"
-    
-    ' ¼ì²éÆÚ³õÊı¾İÎÄ¼şÊÇ·ñ´æÔÚ
+    dataWS.Cells(1, 12) = "æœŸåˆåº“å­˜ä»·å€¼"
+
     Dim prevDataFilePath As String
-    prevDataFilePath = "C:\Users\Finance005\Desktop\111»ª¹¤Í¼ÏñÍ¬²½ÎÄ¼ş\4¡¢¸½±íºÍ¼ò±¨¿âÁä±í\¿âÁä±í\¿â´æ¼ÛÖµ±í25Äê12ÔÂEXPORT.XLSX"
-    
-    If Dir(prevDataFilePath) = "" Then
-        MsgBox "´íÎó£ºÕÒ²»µ½ÆÚ³õÊı¾İÎÄ¼ş '¿â´æ¼ÛÖµ±í25Äê12ÔÂEXPORT.XLSX'¡£"
+    prevDataFilePath = è§£æä¼´ç”Ÿæ–‡ä»¶("æœŸåˆåº“å­˜ä»·å€¼", "åº“å­˜ä»·å€¼è¡¨25å¹´12æœˆEXPORT.XLSX", wb.Path)
+    If Len(prevDataFilePath) = 0 Then
+        Application.ScreenUpdating = True
         Exit Sub
     End If
-    
-    ' ´ò¿ª25Äê12ÔÂÊı¾İ½øĞĞÆ¥Åä
+
     Dim prevDataWB As Workbook
     On Error Resume Next
-    Set prevDataWB = Workbooks.Open(prevDataFilePath)
-    If Err.Number <> 0 Then
-        MsgBox "´íÎó£ºÎŞ·¨´ò¿ªÆÚ³õÊı¾İÎÄ¼ş¡£"
-        Err.Clear
+    Set prevDataWB = Workbooks.Open(prevDataFilePath, ReadOnly:=True)
+    On Error GoTo 0
+    If prevDataWB Is Nothing Then
+        Application.ScreenUpdating = True
+        MsgBox "é”™è¯¯ï¼šæ— æ³•æ‰“å¼€æœŸåˆæ•°æ®æ–‡ä»¶ã€‚" & vbCrLf & prevDataFilePath, vbCritical, "æ‰“å¼€å¤±è´¥"
         Exit Sub
     End If
-    On Error GoTo 0
-    
-    Dim prevDataWS As Worksheet
+
+    Dim prevDataWS As Worksheet, prevLastRow As Long
     Set prevDataWS = prevDataWB.Sheets(1)
-    
-    Dim prevLastRow As Long
     prevLastRow = prevDataWS.Cells(prevDataWS.Rows.Count, "B").End(xlUp).Row
-    
-    ' ´´½¨×Öµä´æ´¢ÉÏÆÚÊı¾İ
+
     Dim prevDataDict As Object
     Set prevDataDict = CreateObject("Scripting.Dictionary")
-    
     For i = 2 To prevLastRow
-        Dim materialNo As String
-        materialNo = CStr(prevDataWS.Cells(i, 2).value)
-        Dim value As Double
-        If IsNumeric(prevDataWS.Cells(i, 11).value) Then
-            value = CDbl(prevDataWS.Cells(i, 11).value)
-        Else
-            value = 0
-        End If
-        prevDataDict(materialNo) = value
+        prevDataDict(CStr(prevDataWS.Cells(i, 2).Value)) = SafeCDbl(prevDataWS.Cells(i, 11).Value)
     Next i
-    
     prevDataWB.Close SaveChanges:=False
-    
-    ' Æ¥ÅäÆÚ³õ¿â´æ¼ÛÖµ
+
+    ' col2 ä»æ˜¯ç‰©æ–™ç¼–ç ï¼ˆå‰é¢åªåœ¨ Eã€L å¤„æ’åˆ—ï¼Œæœªè§¦åŠ A~Dï¼‰
+    Dim currentMaterialNo As String
     For i = 2 To lastRow
-        Dim currentMaterialNo As String
-        currentMaterialNo = CStr(dataWS.Cells(i, 2).value)
-        
+        currentMaterialNo = CStr(dataWS.Cells(i, 2).Value)
         If prevDataDict.Exists(currentMaterialNo) Then
             dataWS.Cells(i, 12) = prevDataDict(currentMaterialNo)
         Else
             dataWS.Cells(i, 12) = 0
         End If
     Next i
-    
-    ' 3. ÔÚBÁĞÎïÁÏ±àÂëÇ°Ìí¼Ó·ÖÀàÁĞ
+
+    ' ---------- 3. æ–°å¢åˆ†ç±»åˆ—ï¼ˆBåˆ—ï¼Œç‰©æ–™ç¼–ç å‰ï¼‰----------
     dataWS.Cells(1, 2).EntireColumn.Insert
-    dataWS.Cells(1, 2) = "·ÖÀà"
-    
+    dataWS.Cells(1, 2) = "åˆ†ç±»"
+    ' æ­¤æ—¶ï¼šcol2=åˆ†ç±», col3=ç‰©æ–™ç¼–ç , col6=ç‰©æ–™ç»„æ–‡æœ¬
     For i = 2 To lastRow
-        Dim materialCode As String
-        materialCode = CStr(dataWS.Cells(i, 3).value)
-        
-        If Len(materialCode) > 0 Then
-            Select Case Left(materialCode, 1)
-                Case "1"
-                    dataWS.Cells(i, 2) = "Ô­²ÄÁÏ"
-                Case "2"
-                    dataWS.Cells(i, 2) = "°ë³ÉÆ·"
-                Case "3"
-                    dataWS.Cells(i, 2) = "³ÉÆ·"
-                Case "4"
-                    dataWS.Cells(i, 2) = "¸¨²Ä"
-                Case "5"
-                    dataWS.Cells(i, 2) = "±¸Æ·±¸¼ş"
-                Case "6"
-                    dataWS.Cells(i, 2) = "ÆäËû"
-                Case Else
-                    dataWS.Cells(i, 2) = "ÆäËû"
-            End Select
-        Else
-            dataWS.Cells(i, 2) = "Î´Öª"
-        End If
+        firstChar = Left$(CStr(dataWS.Cells(i, 3).Value), 1)
+        dataWS.Cells(i, 2) = ç‰©æ–™å¤§ç±»(firstChar)
     Next i
-    
-    ' 4. ´´½¨Ô­²ÄÁÏºÍ³ÉÆ·±í
+
+    ' ---------- 4. æ´¾ç”ŸåŸææ–™é¡µ ----------
     Dim rawMatWS As Worksheet
-    On Error Resume Next
-    Set rawMatWS = wb.Sheets("Ô­²ÄÁÏ")
-    On Error GoTo 0
-    
+    Set rawMatWS = å–å·¥ä½œè¡¨(wb, "åŸææ–™")
     If rawMatWS Is Nothing Then
         Set rawMatWS = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
-        rawMatWS.Name = "Ô­²ÄÁÏ"
+        rawMatWS.Name = "åŸææ–™"
     Else
         rawMatWS.Cells.Clear
     End If
-    
-    ' ¸´ÖÆ±êÌâĞĞ
-    rawMatWS.Range("A1").Resize(1, 17).value = dataWS.Range("A1").Resize(1, 17).value
-    
-    Dim rawMatRow As Long
-    rawMatRow = 2
-    
-    ' É¸Ñ¡Ô­²ÄÁÏ¡¢¸¨²Ä¡¢±¸Æ·±¸¼şµÄÊı¾İ
+    rawMatWS.Range("A1").Resize(1, 17).Value = dataWS.Range("A1").Resize(1, 17).Value
+    Dim rawMatRow As Long: rawMatRow = 2
     For i = 2 To lastRow
-        Dim materialType As String
-        materialType = CStr(dataWS.Cells(i, 2).value)
-        
-        If InStr(materialType, "Ô­²ÄÁÏ") > 0 Or InStr(materialType, "¸¨²Ä") > 0 Or InStr(materialType, "±¸Æ·±¸¼ş") > 0 Then
-            rawMatWS.Range("A" & rawMatRow & ":Q" & rawMatRow).value = _
-                dataWS.Range("A" & i & ":Q" & i).value
+        firstChar = Left$(CStr(dataWS.Cells(i, 3).Value), 1)
+        If å±äºåŸææ–™é¡µ(firstChar) Then
+            rawMatWS.Range("A" & rawMatRow & ":Q" & rawMatRow).Value = dataWS.Range("A" & i & ":Q" & i).Value
             rawMatRow = rawMatRow + 1
         End If
     Next i
-    
-    ' ´´½¨³ÉÆ·±í
+
+    ' ---------- 5. æ´¾ç”Ÿæˆå“é¡µï¼ˆä»£ç =3 ä¸” ç‰©æ–™ç»„æ–‡æœ¬å‘½ä¸­ ç”µåŒ–é“/çº¸å“/è†œå“ï¼‰----------
     Dim finishedProdWS As Worksheet
-    On Error Resume Next
-    Set finishedProdWS = wb.Sheets("³ÉÆ·")
-    On Error GoTo 0
-    
+    Set finishedProdWS = å–å·¥ä½œè¡¨(wb, "æˆå“")
     If finishedProdWS Is Nothing Then
         Set finishedProdWS = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
-        finishedProdWS.Name = "³ÉÆ·"
+        finishedProdWS.Name = "æˆå“"
     Else
         finishedProdWS.Cells.Clear
     End If
-    
-    ' ¸´ÖÆ±êÌâĞĞ
-    finishedProdWS.Range("A1").Resize(1, 17).value = dataWS.Range("A1").Resize(1, 17).value
-    
-    Dim finishedProdRow As Long
-    finishedProdRow = 2
-    
-    ' É¸Ñ¡µç»¯ÂÁ¡¢Ö½Æ·¡¢Ä¤Æ·µÄÊı¾İ
+    finishedProdWS.Range("A1").Resize(1, 17).Value = dataWS.Range("A1").Resize(1, 17).Value
+    Dim finishedProdRow As Long: finishedProdRow = 2
+    Dim groupText As String
     For i = 2 To lastRow
-        Dim groupText As String
-        Dim groupType As String
-        groupText = CStr(dataWS.Cells(i, 6).value)
-        groupType = CStr(dataWS.Cells(i, 2).value)
-        
-        If (InStr(groupText, "µç»¯ÂÁ") > 0 Or InStr(groupText, "Ö½Æ·") > 0 Or InStr(groupText, "Ä¤Æ·") > 0) And InStr(groupType, "³ÉÆ·") > 0 Then
-            finishedProdWS.Range("A" & finishedProdRow & ":Q" & finishedProdRow).value = _
-                dataWS.Range("A" & i & ":Q" & i).value
+        firstChar = Left$(CStr(dataWS.Cells(i, 3).Value), 1)
+        groupText = CStr(dataWS.Cells(i, 6).Value)
+        If å±äºæˆå“é¡µ(firstChar) And _
+           (InStr(groupText, "ç”µåŒ–é“") > 0 Or InStr(groupText, "çº¸å“") > 0 Or InStr(groupText, "è†œå“") > 0) Then
+            finishedProdWS.Range("A" & finishedProdRow & ":Q" & finishedProdRow).Value = dataWS.Range("A" & i & ":Q" & i).Value
             finishedProdRow = finishedProdRow + 1
         End If
     Next i
-    
-    MsgBox "Êı¾İÇåÏ´Íê³É£¡" & vbCrLf & _
-           "´¦ÀíµÄ¹¤×÷²¾: " & wb.Name & vbCrLf & _
-           "´¦ÀíµÄ¹¤×÷±í: " & dataWS.Name & vbCrLf & _
-           "Êı¾İĞĞÊı: " & lastRow, vbInformation, "Íê³É"
-    
+
+    Application.ScreenUpdating = True
+    MsgBox "æ•°æ®æ¸…æ´—å®Œæˆï¼" & vbCrLf & _
+           "å¤„ç†çš„å·¥ä½œç°¿: " & wb.Name & vbCrLf & _
+           "å¤„ç†çš„å·¥ä½œè¡¨: " & dataWS.Name & vbCrLf & _
+           "æ•°æ®è¡Œæ•°: " & (lastRow - 1), vbInformation, "å®Œæˆ"
 End Sub
 
+' å¹‚ç­‰åˆ¤å®šï¼šè¡Œ1 æ˜¯å¦å·²å­˜åœ¨æ´¾ç”Ÿåˆ—è¡¨å¤´
+Private Function å·²å¤„ç†è¿‡(ws As Worksheet) As Boolean
+    Dim lastCol As Long, c As Long, h As String
+    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    For c = 1 To lastCol
+        h = Trim$(CStr(ws.Cells(1, c).Value))
+        If h = "ç‰©æ–™ç»„æ–‡æœ¬" Or h = "æœŸåˆåº“å­˜ä»·å€¼" Or h = "åˆ†ç±»" Then
+            å·²å¤„ç†è¿‡ = True
+            Exit Function
+        End If
+    Next c
+    å·²å¤„ç†è¿‡ = False
+End Function

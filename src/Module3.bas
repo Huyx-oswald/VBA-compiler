@@ -1,212 +1,140 @@
 Attribute VB_Name = "Module3"
-Sub ÇåÏ´¿âÁä±íÊı¾İ()
+' ============================================================
+' æ¸…æ´—åº“é¾„è¡¨æ•°æ®
+' è¾“å…¥ï¼šå½“å‰æ´»åŠ¨å·¥ä½œè¡¨çš„åŸå§‹åº“é¾„è¡¨ï¼ˆAå·¥å‚ Bç‰©æ–™å· â€¦ï¼Œçº¦30åˆ—ï¼Œæœªå«åˆ†ç±»/å‘†æ»åˆ—ï¼‰
+' è¾“å‡ºï¼šæ’å…¥ã€Œåˆ†ç±»ã€åˆ—(B)ä¸ã€Œå‘†æ»æ•°é‡/å‘†æ»é‡‘é¢ã€åˆ—ï¼Œå‘†æ» = è´¦é¾„â‰¥180å¤©åˆ†æ®µä¹‹å’Œ
+' ä¾èµ– ModuleCommonï¼šç‰©æ–™å¤§ç±» / å‘†æ»è±å… / SafeCDbl / æ ¡éªŒè¡¨å¤´
+' ============================================================
+Sub æ¸…æ´—åº“é¾„è¡¨æ•°æ®()
     Dim ws As Worksheet
     Dim lastRow As Long
     Dim i As Long
     Dim stage As String
+    Dim firstChar As String
 
     Set ws = ActiveSheet
-
     On Error GoTo ErrorHandler
 
-    ' ¼ì²éÊÇ·ñÒÑ´¦Àí¹ı
-    If ws.Cells(1, 2).value = "·ÖÀà" Or ws.Cells(1, 14).value = "´ôÖÍÊıÁ¿" Then
-        MsgBox "¸Ã¹¤×÷±íÒÑ´¦Àí¹ı£¬ÇëÊ¹ÓÃÔ­Ê¼¿âÁä±íÊı¾İ£¡", vbExclamation, "ÌáÊ¾"
+    ' å¹‚ç­‰å®ˆå«ï¼šå·²å¤„ç†è¿‡åˆ™ä¸­æ­¢
+    If ws.Cells(1, 2).Value = "åˆ†ç±»" Or ws.Cells(1, 14).Value = "å‘†æ»æ•°é‡" Then
+        MsgBox "è¯¥å·¥ä½œè¡¨å·²å¤„ç†è¿‡ï¼Œè¯·ä½¿ç”¨åŸå§‹åº“é¾„è¡¨æ•°æ®ï¼", vbExclamation, "æç¤º"
         Exit Sub
     End If
 
-    ' ÑéÖ¤ÁĞ½á¹¹£º¼ì²é¹Ø¼üÁĞ±êÌâ
+    ' åˆ—ç»“æ„æ ¡éªŒ
     Dim colCount As Long
     colCount = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
     If colCount < 30 Then
-        MsgBox "ÁĞÊı²»×ã£¡µ±Ç° " & colCount & " ÁĞ£¬Ô¤ÆÚÖÁÉÙ 30 ÁĞ¡£" & vbCrLf & _
-               "ÇëÈ·ÈÏÊÇ·ñÎª±ê×¼¿âÁä±íÊı¾İ¡£", vbCritical, "ÁĞ½á¹¹Òì³£"
+        MsgBox "åˆ—æ•°ä¸è¶³ï¼å½“å‰ " & colCount & " åˆ—ï¼Œé¢„æœŸè‡³å°‘ 30 åˆ—ã€‚" & vbCrLf & _
+               "è¯·ç¡®è®¤æ˜¯å¦ä¸ºæ ‡å‡†åº“é¾„è¡¨æ•°æ®ã€‚", vbCritical, "åˆ—ç»“æ„å¼‚å¸¸"
         Exit Sub
     End If
 
-    ' »ñÈ¡×îºóÒ»ĞĞÊı¾İ
+    ' è¡¨å¤´å¿«ç…§æ ¡éªŒï¼ˆåŸå§‹åº“é¾„è¡¨ï¼šAå·¥å‚ Bç‰©æ–™å·ï¼‰
+    Dim errMsg As String
+    errMsg = æ ¡éªŒè¡¨å¤´(ws, Array("A", "B"), Array("å·¥å‚", "ç‰©æ–™å·"))
+    If Len(errMsg) > 0 Then
+        MsgBox "è¡¨å¤´æ ¡éªŒæœªé€šè¿‡ï¼Œå·²ä¸­æ­¢ï¼š" & vbCrLf & errMsg, vbCritical, "è¡¨å¤´å¼‚å¸¸"
+        Exit Sub
+    End If
+
     lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
     If lastRow < 2 Then
-        MsgBox "Î´¼ì²âµ½Êı¾İĞĞ£¡", vbExclamation, "ÌáÊ¾"
+        MsgBox "æœªæ£€æµ‹åˆ°æ•°æ®è¡Œï¼", vbExclamation, "æç¤º"
         Exit Sub
     End If
 
     Application.ScreenUpdating = False
 
-    stage = "²åÈë·ÖÀàÁĞ"
-    ' 1. ÔÚBÁĞÇ°²åÈëÒ»ÁĞÓÃÓÚ·ÖÀà
+    ' 1. åœ¨Båˆ—å‰æ’å…¥åˆ†ç±»åˆ—ï¼ˆåŸç‰©æ–™å· â†’ Cåˆ—ï¼‰
+    stage = "æ’å…¥åˆ†ç±»åˆ—"
     ws.Columns("B:B").Insert Shift:=xlToRight
 
-    ' 2. ¸üĞÂ·Ö¶Î±êÌâ£¨²åÈë·ÖÀàÁĞºó£¬Ô­MÁĞ±ä³ÉNÁĞ£¬ÒÀ´ÎÓÒÒÆ£©
-    stage = "¸üĞÂ·Ö¶Î±êÌâ1"
-    ws.Cells(1, 14).value = "0-60ÊıÁ¿"
-    ws.Cells(1, 15).value = "0-60½ğ¶î"
-    ws.Cells(1, 16).value = "60-90ÊıÁ¿"
-    ws.Cells(1, 17).value = "60-90½ğ¶î"
-    ws.Cells(1, 18).value = "90-120ÊıÁ¿"
-    ws.Cells(1, 19).value = "90-120½ğ¶î"
-    ws.Cells(1, 20).value = "120-150ÊıÁ¿"
-    ws.Cells(1, 21).value = "120-150½ğ¶î"
-    ws.Cells(1, 22).value = "150-180ÊıÁ¿"
-    ws.Cells(1, 23).value = "150-180½ğ¶î"
-    ws.Cells(1, 24).value = "180-360ÊıÁ¿"
-    ws.Cells(1, 25).value = "180-360½ğ¶î"
-    ws.Cells(1, 26).value = "360-720ÊıÁ¿"
-    ws.Cells(1, 27).value = "360-720½ğ¶î"
-    ws.Cells(1, 28).value = "720-1080ÊıÁ¿"
-    ws.Cells(1, 29).value = "720-1080½ğ¶î"
-    ws.Cells(1, 30).value = "1080ÒÔÉÏÊıÁ¿"
-    ws.Cells(1, 31).value = "1080ÒÔÉÏ½ğ¶î"
-
-    ' ¸ù¾İÎïÁÏºÅÊ××ÖÄ¸·ÖÀà£¨Ô­BÁĞÏÖÔÚÊÇCÁĞ£©
-    stage = "Ìî³ä·ÖÀà"
+    ' 2. æŒ‰é¦–å­—ç¬¦å¡«åˆ†ç±»ï¼ˆåŸBåˆ—ç°åœ¨æ˜¯Cåˆ—ï¼‰
+    stage = "å¡«å……åˆ†ç±»"
     For i = 2 To lastRow
-        Dim firstChar As String
-        firstChar = Left(CStr(ws.Cells(i, 3).value), 1)
-
-        Select Case firstChar
-            Case "1"
-                ws.Cells(i, 2).value = "Ô­²ÄÁÏ"
-            Case "2"
-                ws.Cells(i, 2).value = "°ë³ÉÆ·"
-            Case "3"
-                ws.Cells(i, 2).value = "³ÉÆ·"
-            Case "4"
-                ws.Cells(i, 2).value = "¸¨²Ä"
-            Case "5"
-                ws.Cells(i, 2).value = "±¸Æ·±¸¼ş"
-            Case "9"
-                ws.Cells(i, 2).value = "µ¥Ôª°å"
-            Case Else
-                ws.Cells(i, 2).value = "ÆäËû"
-        End Select
+        firstChar = Left$(CStr(ws.Cells(i, 3).Value), 1)
+        ws.Cells(i, 2).Value = ç‰©æ–™å¤§ç±»(firstChar)
     Next i
+    ws.Cells(1, 2).Value = "åˆ†ç±»"
 
-    ws.Cells(1, 2).value = "·ÖÀà"
-
-    ' 3. ÔÚNÁĞÇ°²åÈëÁ½ÁĞ£º´ôÖÍÊıÁ¿ºÍ´ôÖÍ½ğ¶î
-    stage = "²åÈë´ôÖÍÁĞ"
+    ' 3. åœ¨Nåˆ—å‰æ’å…¥ä¸¤åˆ—ï¼šå‘†æ»æ•°é‡ã€å‘†æ»é‡‘é¢
+    stage = "æ’å…¥å‘†æ»åˆ—"
     ws.Columns("N:N").Insert Shift:=xlToRight
     ws.Columns("N:N").Insert Shift:=xlToRight
+    ws.Cells(1, 14).Value = "å‘†æ»æ•°é‡"
+    ws.Cells(1, 15).Value = "å‘†æ»é‡‘é¢"
 
-    ws.Cells(1, 14).value = "´ôÖÍÊıÁ¿"
-    ws.Cells(1, 15).value = "´ôÖÍ½ğ¶î"
+    ' 4. è®¾ç½®åˆ†æ®µåˆ—æ ‡é¢˜ï¼ˆä¸¤æ¬¡æ’å…¥åè´¦é¾„æ®µæ•´ä½“å³ç§»åˆ° 16~33ï¼‰
+    stage = "æ›´æ–°åˆ†æ®µæ ‡é¢˜"
+    ws.Cells(1, 16).Value = "0-60æ•°é‡"
+    ws.Cells(1, 17).Value = "0-60é‡‘é¢"
+    ws.Cells(1, 18).Value = "60-90æ•°é‡"
+    ws.Cells(1, 19).Value = "60-90é‡‘é¢"
+    ws.Cells(1, 20).Value = "90-120æ•°é‡"
+    ws.Cells(1, 21).Value = "90-120é‡‘é¢"
+    ws.Cells(1, 22).Value = "120-150æ•°é‡"
+    ws.Cells(1, 23).Value = "120-150é‡‘é¢"
+    ws.Cells(1, 24).Value = "150-180æ•°é‡"
+    ws.Cells(1, 25).Value = "150-180é‡‘é¢"
+    ws.Cells(1, 26).Value = "180-360æ•°é‡"
+    ws.Cells(1, 27).Value = "180-360é‡‘é¢"
+    ws.Cells(1, 28).Value = "360-720æ•°é‡"
+    ws.Cells(1, 29).Value = "360-720é‡‘é¢"
+    ws.Cells(1, 30).Value = "720-1080æ•°é‡"
+    ws.Cells(1, 31).Value = "720-1080é‡‘é¢"
+    ws.Cells(1, 32).Value = "1080ä»¥ä¸Šæ•°é‡"
+    ws.Cells(1, 33).Value = "1080ä»¥ä¸Šé‡‘é¢"
 
-    ' 4. ÖØĞÂÉèÖÃ·Ö¶ÎÁĞ±êÌâ£¨ÓÖ²åÈëÁ½ÁĞºóÓÒÒÆ2Î»£©
-    stage = "¸üĞÂ·Ö¶Î±êÌâ2"
-    ws.Cells(1, 16).value = "0-60ÊıÁ¿"
-    ws.Cells(1, 17).value = "0-60½ğ¶î"
-    ws.Cells(1, 18).value = "60-90ÊıÁ¿"
-    ws.Cells(1, 19).value = "60-90½ğ¶î"
-    ws.Cells(1, 20).value = "90-120ÊıÁ¿"
-    ws.Cells(1, 21).value = "90-120½ğ¶î"
-    ws.Cells(1, 22).value = "120-150ÊıÁ¿"
-    ws.Cells(1, 23).value = "120-150½ğ¶î"
-    ws.Cells(1, 24).value = "150-180ÊıÁ¿"
-    ws.Cells(1, 25).value = "150-180½ğ¶î"
-    ws.Cells(1, 26).value = "180-360ÊıÁ¿"
-    ws.Cells(1, 27).value = "180-360½ğ¶î"
-    ws.Cells(1, 28).value = "360-720ÊıÁ¿"
-    ws.Cells(1, 29).value = "360-720½ğ¶î"
-    ws.Cells(1, 30).value = "720-1080ÊıÁ¿"
-    ws.Cells(1, 31).value = "720-1080½ğ¶î"
-    ws.Cells(1, 32).value = "1080ÒÔÉÏÊıÁ¿"
-    ws.Cells(1, 33).value = "1080ÒÔÉÏ½ğ¶î"
-
-    ' 5. ÅĞ¶¨´ôÖÍÎïÁÏ²¢Ìî³äÊıÖµ
-    stage = "ÅĞ¶¨´ôÖÍÎïÁÏ"
+    ' 5. åˆ¤å®šå‘†æ»ç‰©æ–™ï¼ˆè´¦é¾„â‰¥180å¤©çš„å››æ®µä¹‹å’Œï¼›åŠæˆå“-é•ç‰ˆ ä»…å–1080ä»¥ä¸Šæ®µï¼›è¾…æ–™/å¤‡å“å¤‡ä»¶è±å…ï¼‰
+    stage = "åˆ¤å®šå‘†æ»ç‰©æ–™"
+    Dim sGroupDesc As String
+    Dim seg6Qty As Double, seg6Amt As Double
+    Dim seg7Qty As Double, seg7Amt As Double
+    Dim seg8Qty As Double, seg8Amt As Double
+    Dim seg9Qty As Double, seg9Amt As Double
+    Dim totalQty As Double, totalAmt As Double
     For i = 2 To lastRow
-        Dim sGroupDesc As String
-        Dim sCategory As String
-        Dim seg6Qty As Double, seg6Amt As Double
-        Dim seg7Qty As Double, seg7Amt As Double
-        Dim seg8Qty As Double, seg8Amt As Double
-        Dim seg9Qty As Double, seg9Amt As Double
-        Dim totalStagnantQty As Double, totalStagnantAmt As Double
-        Dim isStagnant As Boolean
+        sGroupDesc = CStr(ws.Cells(i, 9).Value)   ' ç‰©æ–™ç»„æè¿°
+        firstChar = Left$(CStr(ws.Cells(i, 3).Value), 1)
 
-        sGroupDesc = CStr(ws.Cells(i, 9).value)
-        sCategory = CStr(ws.Cells(i, 2).value)
+        seg6Qty = SafeCDbl(ws.Cells(i, 26).Value)
+        seg6Amt = SafeCDbl(ws.Cells(i, 27).Value)
+        seg7Qty = SafeCDbl(ws.Cells(i, 28).Value)
+        seg7Amt = SafeCDbl(ws.Cells(i, 29).Value)
+        seg8Qty = SafeCDbl(ws.Cells(i, 30).Value)
+        seg8Amt = SafeCDbl(ws.Cells(i, 31).Value)
+        seg9Qty = SafeCDbl(ws.Cells(i, 32).Value)
+        seg9Amt = SafeCDbl(ws.Cells(i, 33).Value)
 
-        isStagnant = False
-        seg6Qty = 0: seg6Amt = 0
-        seg7Qty = 0: seg7Amt = 0
-        seg8Qty = 0: seg8Amt = 0
-        seg9Qty = 0: seg9Amt = 0
-
-        If sCategory = "¸¨²Ä" Or sCategory = "±¸Æ·±¸¼ş" Then
-            isStagnant = False
-        ElseIf InStr(sGroupDesc, "°ë³ÉÆ·-Äø°æ") > 0 Then
-            seg9Qty = SafeCDbl(ws.Cells(i, 32).value)
-            seg9Amt = SafeCDbl(ws.Cells(i, 33).value)
+        ' ä¸¥æ ¼ä¿ç•™åŸè¯­ä¹‰ï¼šä»…å½“å¯¹åº”åˆè®¡ >0 æ‰å†™å…¥ï¼Œå¦åˆ™å†™ 0
+        If å‘†æ»è±å…(firstChar) Then
+            totalQty = 0: totalAmt = 0
+        ElseIf InStr(sGroupDesc, "åŠæˆå“-é•ç‰ˆ") > 0 Then
             If seg9Qty > 0 Or seg9Amt > 0 Then
-                isStagnant = True
-            End If
-        Else
-            seg6Qty = SafeCDbl(ws.Cells(i, 26).value)
-            seg6Amt = SafeCDbl(ws.Cells(i, 27).value)
-            seg7Qty = SafeCDbl(ws.Cells(i, 28).value)
-            seg7Amt = SafeCDbl(ws.Cells(i, 29).value)
-            seg8Qty = SafeCDbl(ws.Cells(i, 30).value)
-            seg8Amt = SafeCDbl(ws.Cells(i, 31).value)
-            seg9Qty = SafeCDbl(ws.Cells(i, 32).value)
-            seg9Amt = SafeCDbl(ws.Cells(i, 33).value)
-
-            If (seg6Qty + seg7Qty + seg8Qty + seg9Qty) > 0 Or (seg6Amt + seg7Amt + seg8Amt + seg9Amt) > 0 Then
-                isStagnant = True
-            End If
-        End If
-
-        If isStagnant Then
-            If InStr(sGroupDesc, "°ë³ÉÆ·-Äø°æ") > 0 Then
-                totalStagnantQty = seg9Qty
-                totalStagnantAmt = seg9Amt
+                totalQty = seg9Qty: totalAmt = seg9Amt
             Else
-                totalStagnantQty = seg6Qty + seg7Qty + seg8Qty + seg9Qty
-                totalStagnantAmt = seg6Amt + seg7Amt + seg8Amt + seg9Amt
+                totalQty = 0: totalAmt = 0
             End If
-            ws.Cells(i, 14).value = totalStagnantQty
-            ws.Cells(i, 15).value = totalStagnantAmt
         Else
-            ws.Cells(i, 14).value = 0
-            ws.Cells(i, 15).value = 0
+            totalQty = seg6Qty + seg7Qty + seg8Qty + seg9Qty
+            totalAmt = seg6Amt + seg7Amt + seg8Amt + seg9Amt
+            If Not (totalQty > 0 Or totalAmt > 0) Then
+                totalQty = 0: totalAmt = 0
+            End If
         End If
+        ws.Cells(i, 14).Value = totalQty
+        ws.Cells(i, 15).Value = totalAmt
     Next i
 
     Application.ScreenUpdating = True
-    MsgBox "¿âÁä±íÊı¾İÇåÏ´Íê³É£¡¹²´¦Àí " & (lastRow - 1) & " ĞĞÊı¾İ¡£", vbInformation, "Íê³É"
+    MsgBox "åº“é¾„è¡¨æ•°æ®æ¸…æ´—å®Œæˆï¼å…±å¤„ç† " & (lastRow - 1) & " è¡Œæ•°æ®ã€‚", vbInformation, "å®Œæˆ"
     Exit Sub
 
 ErrorHandler:
     Application.ScreenUpdating = True
-    MsgBox "ÇåÏ´Ê§°Ü£¡½×¶Î: " & stage & vbCrLf & _
-           "´íÎóĞĞ: " & i & vbCrLf & _
-           "´íÎó: " & Err.Description & " (´úÂë " & Err.Number & ")", _
-           vbCritical, "ÇåÏ´Ê§°Ü"
+    MsgBox "æ¸…æ´—å¤±è´¥ï¼é˜¶æ®µ: " & stage & vbCrLf & _
+           "é”™è¯¯è¡Œ: " & i & vbCrLf & _
+           "é”™è¯¯: " & Err.Description & " (ä»£ç  " & Err.Number & ")", _
+           vbCritical, "æ¸…æ´—å¤±è´¥"
 End Sub
-
-' °²È«×ª»»ÎªDouble£¬´¦Àí¿ÕÖµ¡¢´íÎóÖµ¡¢ÎÄ±¾
-Function SafeCDbl(value As Variant) As Double
-    If IsError(value) Then
-        SafeCDbl = 0
-    ElseIf IsEmpty(value) Then
-        SafeCDbl = 0
-    ElseIf IsNumeric(value) Then
-        SafeCDbl = CDbl(value)
-    Else
-        SafeCDbl = 0
-    End If
-End Function
-
-' ¼æÈİ¾É´úÂëµÄNzº¯Êı£¨ÒÑĞŞ¸´IsErrorË³Ğò£©
-Function Nz(value As Variant, Optional defaultValue As Variant = 0) As Variant
-    If IsError(value) Then
-        Nz = defaultValue
-    ElseIf IsEmpty(value) Then
-        Nz = defaultValue
-    ElseIf value = "" Then
-        Nz = defaultValue
-    Else
-        Nz = value
-    End If
-End Function

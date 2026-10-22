@@ -1,110 +1,121 @@
 Attribute VB_Name = "Module4"
-Sub ¿âÁä±íÆÚ³õ±ä»¯·ÖÎö()
+' ============================================================
+' åº“é¾„è¡¨æœŸåˆå˜åŒ–åˆ†æ
+' è¾“å…¥ï¼šå½“å‰æ´»åŠ¨å·¥ä½œç°¿çš„å·²æ¸…æ´—åº“é¾„è¡¨ï¼ˆå½“æœŸï¼Œå¦‚ 2026.05ï¼‰+ è®°ä½å¼é€‰å®šçš„å†å²æœŸåº“é¾„è¡¨ï¼ˆæœŸåˆï¼Œå¦‚ 2025.12ï¼‰
+' è¾“å‡ºï¼šåœ¨å½“å‰å·¥ä½œç°¿æ–°å¢ã€åˆ†æç»“æœã€‘è¡¨ï¼ŒæŒ‰ç‰©æ–™å·æ±‡æ€»å¹¶å¯¹æ¯”æœŸåˆ/å½“æœŸå‘†æ»
+' ä¾èµ– ModuleCommonï¼šè§£æä¼´ç”Ÿæ–‡ä»¶ / Nz / æ ¡éªŒè¡¨å¤´ / å–å·¥ä½œè¡¨
+' ============================================================
+Sub åº“é¾„è¡¨æœŸåˆå˜åŒ–åˆ†æ()
     Dim wb2025 As Workbook
     Dim wb2026 As Workbook
     Dim ws2025 As Worksheet
     Dim ws2026 As Worksheet
     Dim wsResult As Worksheet
     Dim filePath2025 As String
-
-    ' ÉèÖÃÎÄ¼şÂ·¾¶£¨Çë¸ù¾İÊµ¼ÊÇé¿öĞŞ¸Ä£©
-    filePath2025 = "C:\Users\Finance005\Desktop\111»ª¹¤Í¼ÏñÍ¬²½ÎÄ¼ş\4¡¢¸½±íºÍ¼ò±¨¿âÁä±í\¿âÁä±í\¿âÁä±í2025.12\2025Äê12ÔÂ¿âÁä±í.XLSX"
+    Dim errMsg As String
 
     On Error GoTo ErrorHandler
 
-    ' ¹Ø±ÕÆÁÄ»Ë¢ĞÂÒÔÌá¸ßĞÔÄÜ
-    Application.ScreenUpdating = False
-    Application.Calculation = xlCalculationManual
-
-    ' ²½Öè1: 2026ÄêÊı¾İ´Óµ±Ç°»î¶¯¹¤×÷±í»ñÈ¡£¬2025Äê´ÓÎÄ¼ş´ò¿ª
     Set wb2026 = ActiveWorkbook
     Set ws2026 = ActiveSheet
 
-    Set wb2025 = Workbooks.Open(filePath2025)
+    ' è®°ä½å¼å®šä½å†å²æœŸåº“é¾„è¡¨ï¼ˆé¦–æ¬¡å¼¹æ¡†ï¼Œä¹‹åè®°ä½ï¼›å–æ¶ˆåˆ™ä¸­æ­¢ï¼‰
+    filePath2025 = è§£æä¼´ç”Ÿæ–‡ä»¶("åº“é¾„è¡¨å†å²æœŸæ–‡ä»¶", "2025å¹´12æœˆåº“é¾„è¡¨.XLSX", wb2026.Path)
+    If Len(filePath2025) = 0 Then Exit Sub
+
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+
+    ' è¡¨å¤´å¿«ç…§æ ¡éªŒï¼šå½“æœŸä¸å†å²æœŸéƒ½åº”æ˜¯å·²æ¸…æ´—åº“é¾„è¡¨ï¼ˆBåˆ†ç±» Cç‰©æ–™å·ï¼‰
+    errMsg = æ ¡éªŒè¡¨å¤´(ws2026, Array("B", "C"), Array("åˆ†ç±»", "ç‰©æ–™å·"))
+    If Len(errMsg) > 0 Then
+        MsgBox "å½“æœŸåº“é¾„è¡¨è¡¨å¤´æ ¡éªŒæœªé€šè¿‡ï¼ˆæ˜¯å¦å·²å…ˆåšåº“é¾„è¡¨æ¸…æ´—ï¼Ÿï¼‰ï¼š" & vbCrLf & errMsg, vbCritical, "è¡¨å¤´å¼‚å¸¸"
+        GoTo CleanExit
+    End If
+
+    Set wb2025 = Workbooks.Open(filePath2025, ReadOnly:=True)
     Set ws2025 = wb2025.Sheets(1)
-    
-    ' ²½Öè2: ÔÚÄ¿±ê¿âÁä±í¹¤×÷²¾ÖĞ´´½¨½á¹û¹¤×÷±í
+
+    errMsg = æ ¡éªŒè¡¨å¤´(ws2025, Array("B", "C"), Array("åˆ†ç±»", "ç‰©æ–™å·"))
+    If Len(errMsg) > 0 Then
+        MsgBox "å†å²æœŸåº“é¾„è¡¨è¡¨å¤´æ ¡éªŒæœªé€šè¿‡ï¼š" & vbCrLf & errMsg, vbCritical, "è¡¨å¤´å¼‚å¸¸"
+        GoTo CleanExit
+    End If
+
+    ' é‡å»ºç»“æœè¡¨
     Application.DisplayAlerts = False
     On Error Resume Next
-    wb2026.Sheets("·ÖÎö½á¹û").Delete
+    wb2026.Sheets("åˆ†æç»“æœ").Delete
     On Error GoTo ErrorHandler
     Application.DisplayAlerts = True
-    
-    ' ÔÚÄ¿±ê¹¤×÷²¾ÖĞ´´½¨ĞÂ¹¤×÷±í
+
     Set wsResult = wb2026.Sheets.Add(After:=wb2026.Sheets(wb2026.Sheets.Count))
-    wsResult.Name = "·ÖÎö½á¹û"
-    
-    ' ²½Öè3: ÉèÖÃ±êÌâĞĞ
-    Call ÉèÖÃ±êÌâĞĞ(wsResult)
-    
-    ' ²½Öè4: °´ÎïÁÏºÅ»ã×Ü2026Äê5ÔÂÊı¾İ
+    wsResult.Name = "åˆ†æç»“æœ"
+
+    Call è®¾ç½®æ ‡é¢˜è¡Œ(wsResult)
+
     Dim dict2026 As Object
     Set dict2026 = CreateObject("Scripting.Dictionary")
-    Call »ã×ÜÊı¾İ(ws2026, dict2026)
-    
-    ' ²½Öè5: °´ÎïÁÏºÅ»ã×Ü2025Äê12ÔÂÊı¾İ
+    Call æ±‡æ€»æ•°æ®(ws2026, dict2026)
+
     Dim dict2025 As Object
     Set dict2025 = CreateObject("Scripting.Dictionary")
-    Call »ã×ÜÊı¾İ(ws2025, dict2025)
-    
-    ' ²½Öè6: Ìî³ä½á¹û±í
-    Call Ìî³ä½á¹û±í(wsResult, dict2026, dict2025)
-    
-    ' ²½Öè7: °´²îÒì½ğ¶îµ¹ĞòÅÅĞò
-    Call °´²îÒì½ğ¶îÅÅĞò(wsResult)
-    
-    ' ²½Öè8: ¸ñÊ½»¯½á¹û±í
-    Call ¸ñÊ½»¯½á¹û±í(wsResult)
-    
-    ' ¼¤»î½á¹û¹¤×÷±í
+    Call æ±‡æ€»æ•°æ®(ws2025, dict2025)
+
+    Call å¡«å……ç»“æœè¡¨(wsResult, dict2026, dict2025)
+    Call æŒ‰å·®å¼‚é‡‘é¢æ’åº(wsResult)
+    Call æ ¼å¼åŒ–ç»“æœè¡¨(wsResult)
+
     wsResult.Activate
-    
-    ' ¹Ø±Õ2025Äê¹¤×÷²¾£¨²»±£´æ£©
     wb2025.Close SaveChanges:=False
-    
-    ' ±£´æ2026Äê¹¤×÷²¾£¨°üº¬ĞÂÉú³ÉµÄ·ÖÎö½á¹û±í£©
     wb2026.Save
-    
-    ' »Ö¸´ÆÁÄ»Ë¢ĞÂ
+
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
-    
-    MsgBox "·ÖÎöÍê³É£¡½á¹ûÒÑÉú³ÉÔÚµ±Ç°¹¤×÷²¾µÄ¡¾·ÖÎö½á¹û¡¿¹¤×÷±íÖĞ¡£", vbInformation, "Íê³É"
-    
+
+    MsgBox "åˆ†æå®Œæˆï¼ç»“æœå·²ç”Ÿæˆåœ¨å½“å‰å·¥ä½œç°¿çš„ã€åˆ†æç»“æœã€‘å·¥ä½œè¡¨ä¸­ã€‚", vbInformation, "å®Œæˆ"
     Exit Sub
-    
-ErrorHandler:
+
+CleanExit:
+    If Not wb2025 Is Nothing Then wb2025.Close SaveChanges:=False
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
     Application.DisplayAlerts = True
-    MsgBox "·¢Éú´íÎó: " & Err.Description, vbCritical, "´íÎó"
+    Exit Sub
+
+ErrorHandler:
+    If Not wb2025 Is Nothing Then wb2025.Close SaveChanges:=False
+    Application.ScreenUpdating = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.DisplayAlerts = True
+    MsgBox "å‘ç”Ÿé”™è¯¯: " & Err.Description, vbCritical, "é”™è¯¯"
 End Sub
 
-' ÉèÖÃ±êÌâĞĞ
-Private Sub ÉèÖÃ±êÌâĞĞ(ws As Worksheet)
+' è®¾ç½®æ ‡é¢˜è¡Œ
+Private Sub è®¾ç½®æ ‡é¢˜è¡Œ(ws As Worksheet)
     With ws.Range("A1")
-        .value = "ÎïÁÏºÅ"
-        .Offset(0, 1).value = "·ÖÀà"
-        .Offset(0, 2).value = "ÎïÁÏÃèÊö"
-        .Offset(0, 3).value = "ÎïÁÏ×éÃèÊö"
-        .Offset(0, 4).value = "µ¥Î»"
-        .Offset(0, 5).value = "µ±ÆÚÊıÁ¿"
-        .Offset(0, 6).value = "µ±ÆÚ½ğ¶î"
-        .Offset(0, 7).value = "µ±ÆÚ´ôÖÍÊıÁ¿"
-        .Offset(0, 8).value = "µ±ÆÚ´ôÖÍ½ğ¶î"
-        .Offset(0, 9).value = "ÆÚ³õÊıÁ¿"
-        .Offset(0, 10).value = "ÆÚ³õ½ğ¶î"
-        .Offset(0, 11).value = "ÆÚ³õ´ôÖÍÊıÁ¿"
-        .Offset(0, 12).value = "ÆÚ³õ´ôÖÍ½ğ¶î"
-        .Offset(0, 13).value = "ÊıÁ¿²îÒì"
-        .Offset(0, 14).value = "½ğ¶î²îÒì"
-        .Offset(0, 15).value = "ÊıÁ¿²îÒì·ù¶È"
-        .Offset(0, 16).value = "½ğ¶î²îÒì·ù¶È"
+        .Value = "ç‰©æ–™å·"
+        .Offset(0, 1).Value = "åˆ†ç±»"
+        .Offset(0, 2).Value = "ç‰©æ–™æè¿°"
+        .Offset(0, 3).Value = "ç‰©æ–™ç»„æè¿°"
+        .Offset(0, 4).Value = "å•ä½"
+        .Offset(0, 5).Value = "å½“æœŸæ•°é‡"
+        .Offset(0, 6).Value = "å½“æœŸé‡‘é¢"
+        .Offset(0, 7).Value = "å½“æœŸå‘†æ»æ•°é‡"
+        .Offset(0, 8).Value = "å½“æœŸå‘†æ»é‡‘é¢"
+        .Offset(0, 9).Value = "æœŸåˆæ•°é‡"
+        .Offset(0, 10).Value = "æœŸåˆé‡‘é¢"
+        .Offset(0, 11).Value = "æœŸåˆå‘†æ»æ•°é‡"
+        .Offset(0, 12).Value = "æœŸåˆå‘†æ»é‡‘é¢"
+        .Offset(0, 13).Value = "æ•°é‡å·®å¼‚"
+        .Offset(0, 14).Value = "é‡‘é¢å·®å¼‚"
+        .Offset(0, 15).Value = "æ•°é‡å·®å¼‚å¹…åº¦"
+        .Offset(0, 16).Value = "é‡‘é¢å·®å¼‚å¹…åº¦"
     End With
 End Sub
 
-' °´ÎïÁÏºÅ»ã×ÜÊı¾İ
-Private Sub »ã×ÜÊı¾İ(ws As Worksheet, dict As Object)
+' æŒ‰ç‰©æ–™å·æ±‡æ€»æ•°æ®
+Private Sub æ±‡æ€»æ•°æ®(ws As Worksheet, dict As Object)
     Dim lastRow As Long
     Dim i As Long
     Dim materialCode As Variant
@@ -117,43 +128,39 @@ Private Sub »ã×ÜÊı¾İ(ws As Worksheet, dict As Object)
     Dim stagnantQty As Double
     Dim stagnantAmt As Double
     Dim key As String
-    
+
     lastRow = ws.Cells(ws.Rows.Count, "C").End(xlUp).Row
-    
+
     For i = 2 To lastRow
-        materialCode = ws.Cells(i, "C").value
-        
-        ' Ìø¹ı¿ÕÖµ
+        materialCode = ws.Cells(i, "C").Value
         If materialCode <> "" Then
             key = CStr(materialCode)
-            category = CStr(ws.Cells(i, "B").value)
-            materialDesc = CStr(ws.Cells(i, "F").value)
-            unit = CStr(ws.Cells(i, "K").value)
-            qty = CDbl(Nz(ws.Cells(i, "J").value, 0))
-            amt = CDbl(Nz(ws.Cells(i, "L").value, 0))
-            groupDesc = CStr(ws.Cells(i, "I").value)
-            stagnantQty = CDbl(Nz(ws.Cells(i, "N").value, 0))
-            stagnantAmt = CDbl(Nz(ws.Cells(i, "O").value, 0))
-            
+            category = CStr(ws.Cells(i, "B").Value)
+            materialDesc = CStr(ws.Cells(i, "F").Value)
+            unit = CStr(ws.Cells(i, "K").Value)
+            qty = CDbl(Nz(ws.Cells(i, "J").Value, 0))
+            amt = CDbl(Nz(ws.Cells(i, "L").Value, 0))
+            groupDesc = CStr(ws.Cells(i, "I").Value)
+            stagnantQty = CDbl(Nz(ws.Cells(i, "N").Value, 0))
+            stagnantAmt = CDbl(Nz(ws.Cells(i, "O").Value, 0))
+
             If dict.Exists(key) Then
-                ' ÀÛ¼ÓÊıÁ¿ºÍ½ğ¶î
                 Dim arr As Variant
                 arr = dict(key)
-                arr(3) = arr(3) + qty        ' ÊıÁ¿
-                arr(4) = arr(4) + amt        ' ½ğ¶î
-                arr(6) = arr(6) + stagnantQty  ' ´ôÖÍÊıÁ¿
-                arr(7) = arr(7) + stagnantAmt  ' ´ôÖÍ½ğ¶î
+                arr(3) = arr(3) + qty
+                arr(4) = arr(4) + amt
+                arr(6) = arr(6) + stagnantQty
+                arr(7) = arr(7) + stagnantAmt
                 dict(key) = arr
             Else
-                ' ĞÂÔö¼ÇÂ¼
                 dict.Add key, Array(category, materialDesc, unit, qty, amt, groupDesc, stagnantQty, stagnantAmt)
             End If
         End If
     Next i
 End Sub
 
-' Ìî³ä½á¹û±í
-Private Sub Ìî³ä½á¹û±í(ws As Worksheet, dict2026 As Object, dict2025 As Object)
+' å¡«å……ç»“æœè¡¨
+Private Sub å¡«å……ç»“æœè¡¨(ws As Worksheet, dict2026 As Object, dict2025 As Object)
     Dim key As Variant
     Dim rowNum As Long
     Dim arr2026 As Variant
@@ -162,117 +169,101 @@ Private Sub Ìî³ä½á¹û±í(ws As Worksheet, dict2026 As Object, dict2025 As Object)
     Dim amtDiff As Double
     Dim qtyDiffRate As Variant
     Dim amtDiffRate As Variant
-    
+
     rowNum = 2
-    
-    ' ±éÀú2026Äê5ÔÂÊı¾İ
-    For Each key In dict2026.keys
+
+    For Each key In dict2026.Keys
         arr2026 = dict2026(key)
-        
-        ' Ğ´Èë»ù´¡ĞÅÏ¢
-        ws.Cells(rowNum, 1).value = key
-        ws.Cells(rowNum, 2).value = arr2026(0)  ' ·ÖÀà
-        ws.Cells(rowNum, 3).value = arr2026(1)  ' ÎïÁÏÃèÊö
-        ws.Cells(rowNum, 4).value = arr2026(5)  ' ÎïÁÏ×éÃèÊö
-        ws.Cells(rowNum, 5).value = arr2026(2)  ' µ¥Î»
-        ws.Cells(rowNum, 6).value = arr2026(3)  ' µ±ÆÚÊıÁ¿
-        ws.Cells(rowNum, 7).value = arr2026(4)  ' µ±ÆÚ½ğ¶î
-        ws.Cells(rowNum, 8).value = arr2026(6)  ' µ±ÆÚ´ôÖÍÊıÁ¿
-        ws.Cells(rowNum, 9).value = arr2026(7)  ' µ±ÆÚ´ôÖÍ½ğ¶î
-        
-        ' Æ¥Åä2025Äê12ÔÂÊı¾İ
+        ws.Cells(rowNum, 1).Value = key
+        ws.Cells(rowNum, 2).Value = arr2026(0)
+        ws.Cells(rowNum, 3).Value = arr2026(1)
+        ws.Cells(rowNum, 4).Value = arr2026(5)
+        ws.Cells(rowNum, 5).Value = arr2026(2)
+        ws.Cells(rowNum, 6).Value = arr2026(3)
+        ws.Cells(rowNum, 7).Value = arr2026(4)
+        ws.Cells(rowNum, 8).Value = arr2026(6)
+        ws.Cells(rowNum, 9).Value = arr2026(7)
+
         If dict2025.Exists(key) Then
             arr2025 = dict2025(key)
-            ws.Cells(rowNum, 10).value = arr2025(3)  ' ÆÚ³õÊıÁ¿
-            ws.Cells(rowNum, 11).value = arr2025(4)  ' ÆÚ³õ½ğ¶î
-            ws.Cells(rowNum, 12).value = arr2025(6)  ' ÆÚ³õ´ôÖÍÊıÁ¿
-            ws.Cells(rowNum, 13).value = arr2025(7)  ' ÆÚ³õ´ôÖÍ½ğ¶î
+            ws.Cells(rowNum, 10).Value = arr2025(3)
+            ws.Cells(rowNum, 11).Value = arr2025(4)
+            ws.Cells(rowNum, 12).Value = arr2025(6)
+            ws.Cells(rowNum, 13).Value = arr2025(7)
         Else
-            ws.Cells(rowNum, 10).value = 0
-            ws.Cells(rowNum, 11).value = 0
-            ws.Cells(rowNum, 12).value = 0
-            ws.Cells(rowNum, 13).value = 0
+            ws.Cells(rowNum, 10).Value = 0
+            ws.Cells(rowNum, 11).Value = 0
+            ws.Cells(rowNum, 12).Value = 0
+            ws.Cells(rowNum, 13).Value = 0
         End If
-        
-        ' ¼ÆËã²îÒì
-        qtyDiff = arr2026(6) - ws.Cells(rowNum, 12).value
-        amtDiff = arr2026(7) - ws.Cells(rowNum, 13).value
-        
-        ws.Cells(rowNum, 14).value = qtyDiff   ' ÊıÁ¿²îÒì
-        ws.Cells(rowNum, 15).value = amtDiff   ' ½ğ¶î²îÒì
-        
-        ' ¼ÆËã²îÒì·ù¶È
-        If ws.Cells(rowNum, 12).value <> 0 Then
-            qtyDiffRate = qtyDiff / ws.Cells(rowNum, 12).value
+
+        qtyDiff = arr2026(6) - ws.Cells(rowNum, 12).Value
+        amtDiff = arr2026(7) - ws.Cells(rowNum, 13).Value
+        ws.Cells(rowNum, 14).Value = qtyDiff
+        ws.Cells(rowNum, 15).Value = amtDiff
+
+        If ws.Cells(rowNum, 12).Value <> 0 Then
+            qtyDiffRate = qtyDiff / ws.Cells(rowNum, 12).Value
         Else
             qtyDiffRate = IIf(qtyDiff = 0, 0, "#DIV/0!")
         End If
-        
-        If ws.Cells(rowNum, 13).value <> 0 Then
-            amtDiffRate = amtDiff / ws.Cells(rowNum, 13).value
+
+        If ws.Cells(rowNum, 13).Value <> 0 Then
+            amtDiffRate = amtDiff / ws.Cells(rowNum, 13).Value
         Else
             amtDiffRate = IIf(amtDiff = 0, 0, "#DIV/0!")
         End If
-        
-        ws.Cells(rowNum, 16).value = qtyDiffRate  ' ÊıÁ¿²îÒì·ù¶È
-        ws.Cells(rowNum, 17).value = amtDiffRate  ' ½ğ¶î²îÒì·ù¶È
-        
+
+        ws.Cells(rowNum, 16).Value = qtyDiffRate
+        ws.Cells(rowNum, 17).Value = amtDiffRate
         rowNum = rowNum + 1
     Next key
-    
-    ' ´¦Àí2025ÄêÓĞµ«2026ÄêÃ»ÓĞµÄÊı¾İ£¨ÆÚ³õÓĞ£¬ÆÚÄ©ÎŞ£©
-    For Each key In dict2025.keys
+
+    For Each key In dict2025.Keys
         If Not dict2026.Exists(key) Then
             arr2025 = dict2025(key)
-            
-            ws.Cells(rowNum, 1).value = key
-            ws.Cells(rowNum, 2).value = arr2025(0)   ' ·ÖÀà
-            ws.Cells(rowNum, 3).value = arr2025(1)   ' ÎïÁÏÃèÊö
-            ws.Cells(rowNum, 4).value = arr2025(5)   ' ÎïÁÏ×éÃèÊö
-            ws.Cells(rowNum, 5).value = arr2025(2)   ' µ¥Î»
-            ws.Cells(rowNum, 6).value = 0             ' µ±ÆÚÊıÁ¿
-            ws.Cells(rowNum, 7).value = 0             ' µ±ÆÚ½ğ¶î
-            ws.Cells(rowNum, 8).value = 0             ' µ±ÆÚ´ôÖÍÊıÁ¿
-            ws.Cells(rowNum, 9).value = 0             ' µ±ÆÚ´ôÖÍ½ğ¶î
-            ws.Cells(rowNum, 10).value = arr2025(3)  ' ÆÚ³õÊıÁ¿
-            ws.Cells(rowNum, 11).value = arr2025(4)  ' ÆÚ³õ½ğ¶î
-            ws.Cells(rowNum, 12).value = arr2025(6)  ' ÆÚ³õ´ôÖÍÊıÁ¿
-            ws.Cells(rowNum, 13).value = arr2025(7)  ' ÆÚ³õ´ôÖÍ½ğ¶î
-            ws.Cells(rowNum, 14).value = -arr2025(6) ' ÊıÁ¿²îÒì
-            ws.Cells(rowNum, 15).value = -arr2025(7) ' ½ğ¶î²îÒì
-            ws.Cells(rowNum, 16).value = -1          ' ÊıÁ¿²îÒì·ù¶È
-            ws.Cells(rowNum, 17).value = -1          ' ½ğ¶î²îÒì·ù¶È
-            
+            ws.Cells(rowNum, 1).Value = key
+            ws.Cells(rowNum, 2).Value = arr2025(0)
+            ws.Cells(rowNum, 3).Value = arr2025(1)
+            ws.Cells(rowNum, 4).Value = arr2025(5)
+            ws.Cells(rowNum, 5).Value = arr2025(2)
+            ws.Cells(rowNum, 6).Value = 0
+            ws.Cells(rowNum, 7).Value = 0
+            ws.Cells(rowNum, 8).Value = 0
+            ws.Cells(rowNum, 9).Value = 0
+            ws.Cells(rowNum, 10).Value = arr2025(3)
+            ws.Cells(rowNum, 11).Value = arr2025(4)
+            ws.Cells(rowNum, 12).Value = arr2025(6)
+            ws.Cells(rowNum, 13).Value = arr2025(7)
+            ws.Cells(rowNum, 14).Value = -arr2025(6)
+            ws.Cells(rowNum, 15).Value = -arr2025(7)
+            ws.Cells(rowNum, 16).Value = -1
+            ws.Cells(rowNum, 17).Value = -1
             rowNum = rowNum + 1
         End If
     Next key
 End Sub
 
-' °´²îÒì½ğ¶îµ¹ĞòÅÅĞò
-Private Sub °´²îÒì½ğ¶îÅÅĞò(ws As Worksheet)
+' æŒ‰å·®å¼‚é‡‘é¢å€’åºæ’åº
+Private Sub æŒ‰å·®å¼‚é‡‘é¢æ’åº(ws As Worksheet)
     Dim lastRow As Long
     Dim dataRange As Range
-    
     lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
-    
     If lastRow > 1 Then
         Set dataRange = ws.Range("A1:Q" & lastRow)
-        
         dataRange.Sort Key1:=ws.Range("O1"), Order1:=xlDescending, _
                        Header:=xlYes, MatchCase:=False, Orientation:=xlTopToBottom
     End If
 End Sub
 
-' ¸ñÊ½»¯½á¹û±í
-Private Sub ¸ñÊ½»¯½á¹û±í(ws As Worksheet)
+' æ ¼å¼åŒ–ç»“æœè¡¨
+Private Sub æ ¼å¼åŒ–ç»“æœè¡¨(ws As Worksheet)
     Dim lastRow As Long
     Dim lastCol As Long
     Dim i As Long
-    
     lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
     lastCol = 17
-    
-    ' ÉèÖÃ±êÌâĞĞ¸ñÊ½
+
     With ws.Range("A1:Q1")
         .Font.Bold = True
         .Interior.Color = RGB(68, 114, 196)
@@ -280,39 +271,30 @@ Private Sub ¸ñÊ½»¯½á¹û±í(ws As Worksheet)
         .HorizontalAlignment = xlCenter
         .VerticalAlignment = xlCenter
     End With
-    
-    ' ÉèÖÃÊı¾İ¸ñÊ½
+
     If lastRow > 1 Then
-        ' ÊıÁ¿ÁĞ¸ñÊ½£¨ÕûÊı£©
-        ws.Range("F2:F" & lastRow).NumberFormat = "#,##0"   ' µ±ÆÚÊıÁ¿
-        ws.Range("H2:H" & lastRow).NumberFormat = "#,##0"   ' µ±ÆÚ´ôÖÍÊıÁ¿
-        ws.Range("J2:J" & lastRow).NumberFormat = "#,##0"   ' ÆÚ³õÊıÁ¿
-        ws.Range("L2:L" & lastRow).NumberFormat = "#,##0"   ' ÆÚ³õ´ôÖÍÊıÁ¿
-        ws.Range("N2:N" & lastRow).NumberFormat = "#,##0"   ' ÊıÁ¿²îÒì
-        
-        ' ½ğ¶îÁĞ¸ñÊ½£¨»õ±Ò£©
-        ws.Range("G2:G" & lastRow).NumberFormat = "#,##0.00" ' µ±ÆÚ½ğ¶î
-        ws.Range("I2:I" & lastRow).NumberFormat = "#,##0.00" ' µ±ÆÚ´ôÖÍ½ğ¶î
-        ws.Range("K2:K" & lastRow).NumberFormat = "#,##0.00" ' ÆÚ³õ½ğ¶î
-        ws.Range("M2:M" & lastRow).NumberFormat = "#,##0.00" ' ÆÚ³õ´ôÖÍ½ğ¶î
-        ws.Range("O2:O" & lastRow).NumberFormat = "#,##0.00" ' ½ğ¶î²îÒì
-        
-        ' ²îÒì·ù¶È¸ñÊ½£¨°Ù·Ö±È£©
+        ws.Range("F2:F" & lastRow).NumberFormat = "#,##0"
+        ws.Range("H2:H" & lastRow).NumberFormat = "#,##0"
+        ws.Range("J2:J" & lastRow).NumberFormat = "#,##0"
+        ws.Range("L2:L" & lastRow).NumberFormat = "#,##0"
+        ws.Range("N2:N" & lastRow).NumberFormat = "#,##0"
+        ws.Range("G2:G" & lastRow).NumberFormat = "#,##0.00"
+        ws.Range("I2:I" & lastRow).NumberFormat = "#,##0.00"
+        ws.Range("K2:K" & lastRow).NumberFormat = "#,##0.00"
+        ws.Range("M2:M" & lastRow).NumberFormat = "#,##0.00"
+        ws.Range("O2:O" & lastRow).NumberFormat = "#,##0.00"
         ws.Range("P2:Q" & lastRow).NumberFormat = "0.00%"
     End If
-    
-    ' ×Ô¶¯µ÷ÕûÁĞ¿í
+
     For i = 1 To lastCol
         ws.Columns(i).AutoFit
     Next i
-    
-    ' ¶³½áÊ×ĞĞ
+
     ws.Activate
     ActiveWindow.FreezePanes = False
     ws.Range("A2").Select
     ActiveWindow.FreezePanes = True
-    
-    ' Ìí¼Ó±ß¿ò
+
     If lastRow > 1 Then
         With ws.Range("A1:Q" & lastRow).Borders
             .LineStyle = xlContinuous
@@ -320,17 +302,3 @@ Private Sub ¸ñÊ½»¯½á¹û±í(ws As Worksheet)
         End With
     End If
 End Sub
-
-' ¸¨Öúº¯Êı£º´¦Àí¿ÕÖµ
-Private Function Nz(value As Variant, Optional defaultValue As Variant = 0) As Variant
-    If IsError(value) Then
-        Nz = defaultValue
-    ElseIf IsEmpty(value) Or IsNull(value) Then
-        Nz = defaultValue
-    ElseIf value = "" Then
-        Nz = defaultValue
-    Else
-        Nz = value
-    End If
-End Function
-

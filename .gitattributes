@@ -1,0 +1,14 @@
+# Normalize line endings: store LF in repo, check out CRLF on Windows
+* text=auto
+
+# VBA source + build/pack scripts: CRLF in working tree
+*.bas    text eol=crlf
+*.cls    text eol=crlf
+*.vbs    text eol=crlf
+*.ps1    text eol=crlf
+*.txt    text eol=crlf
+*.md     text eol=crlf
+
+# Binary Office artifacts (never diff/merge)
+*.xlam   binary
+*.xlsm   binary

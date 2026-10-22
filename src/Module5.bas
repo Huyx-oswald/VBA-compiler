@@ -1,97 +1,100 @@
 Attribute VB_Name = "Module5"
-Sub ²É¹º·¢Æ±ĞÅÏ¢Êı¾İÇåÏ´()
-    '=============================================================
-    ' ¹¦ÄÜËµÃ÷£º
-    ' 1. É¸Ñ¡ HÁĞ="H" ÇÒ WÁĞ="·ñ" µÄĞĞ£¬ÌáÈ¡AKÁĞ·Ç¿ÕÖµ×÷ÎªÌØÕ÷¼¯ºÏ
-    ' 2. É¾³ıËùÓĞ AKÁĞÖµÔÚ¸ÃÌØÕ÷¼¯ºÏÖĞµÄĞĞ
-    ' 3. ¶ÔÊ£ÓàÊı¾İÖĞ WÁĞ="ÊÇ" µÄĞĞ£¬½« QÁĞÊıÖµ¸ÄÎª¸ºÊı
-    '
-    ' ÁĞ¶ÔÓ¦¹ØÏµ£¨»ùÓÚÊµ¼ÊÎÄ¼ş£©£º
-    '   HÁĞ = D/C       WÁĞ = ÍË»õÏîÄ¿    QÁĞ = ½ğ¶î    AKÁĞ = ²Î¿¼
-    '=============================================================
-    
+' ============================================================
+' é‡‡è´­å‘ç¥¨ä¿¡æ¯æ•°æ®æ¸…æ´—
+' 1. æ”¶é›†ç‰¹å¾é›†åˆï¼šHåˆ—="H" ä¸” Wåˆ—="å¦" çš„è¡Œï¼Œå–å…¶ AKåˆ—éç©ºå€¼
+' 2. åˆ é™¤æ‰€æœ‰ AKåˆ—å€¼å‘½ä¸­ç‰¹å¾é›†åˆçš„è¡Œ
+' 3. å¯¹å‰©ä½™ Wåˆ—="æ˜¯" çš„è¡Œï¼Œå°† Qåˆ—é‡‘é¢å–ä¸ºè´Ÿæ•°
+'
+' åˆ—å¯¹åº”ï¼ˆåŸºäºå®é™…å‘ç¥¨å¯¼å‡ºæ–‡ä»¶ï¼‰ï¼š
+'   Håˆ— = å‡­è¯ç±»å‹(D/C)   Wåˆ— = é€€è´§é¡¹ç›®   Qåˆ— = é‡‘é¢   AKåˆ— = å‚è€ƒ
+'
+' BUG-3ï¼ˆé˜²è¯¯åˆ ï¼‰ï¼šç¬¬2æ­¥åˆ é™¤å‰å¼¹é¢„è§ˆç¡®è®¤ï¼Œå¹¶é¢å¤–ç»Ÿè®¡â€œå‘½ä¸­ç‰¹å¾ä½† W<>'å¦'â€çš„è¡Œæ•°
+'   ä½œä¸ºé£é™©æç¤ºï¼ˆè¿™äº›è¡ŒåŸæœ¬æ˜¯å¯èƒ½ä¸è¯¥åˆ çš„æ­£å¸¸è¡Œï¼‰ã€‚ç”¨æˆ·å–æ¶ˆåˆ™ä¸åˆ é™¤ã€‚
+' ============================================================
+Sub é‡‡è´­å‘ç¥¨ä¿¡æ¯æ•°æ®æ¸…æ´—()
     Dim ws As Worksheet
     Set ws = ActiveSheet
-    
+
     Dim lastRow As Long
     lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
-    
     If lastRow < 2 Then
-        MsgBox "Ã»ÓĞÊı¾İĞĞ£¬Çë¼ì²é£¡", vbExclamation
+        MsgBox "æ²¡æœ‰æ•°æ®è¡Œï¼Œè¯·æ£€æŸ¥ï¼", vbExclamation
         Exit Sub
     End If
-    
+
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
-    
-    '---------------------------------------------------------
-    ' µÚÒ»²½£ºÊÕ¼¯ÌØÕ÷¼¯ºÏ£¨H="H" ÇÒ W="·ñ" Ê± AKÁĞµÄ·Ç¿ÕÖµ£©
-    '---------------------------------------------------------
+
+    ' --- ç¬¬ä¸€æ­¥ï¼šæ”¶é›†ç‰¹å¾é›†åˆ ---
     Dim featureDict As Object
     Set featureDict = CreateObject("Scripting.Dictionary")
-    
-    Dim i As Long
-    Dim akVal As String
-    
+    Dim i As Long, akVal As String
     For i = 2 To lastRow
-        If UCase(Trim(ws.Cells(i, "H").value)) = "H" And _
-           Trim(ws.Cells(i, "W").value) = "·ñ" Then
-            akVal = Trim(CStr(ws.Cells(i, "AK").value))
+        If UCase(Trim$(CStr(ws.Cells(i, "H").Value))) = "H" And _
+           Trim$(CStr(ws.Cells(i, "W").Value)) = "å¦" Then
+            akVal = Trim$(CStr(ws.Cells(i, "AK").Value))
             If akVal <> "" And Not featureDict.Exists(akVal) Then
                 featureDict.Add akVal, True
             End If
         End If
     Next i
-    
-    ' µÚÒ»²½½á¹û¼ÇÂ¼£¨²»ÖĞ¶ÏºóĞø²½Öè£©
     Dim step1Count As Long
     step1Count = featureDict.Count
-    
-    '---------------------------------------------------------
-    ' µÚ¶ş²½£º´ÓÏÂÍùÉÏÉ¾³ı AKÁĞÖµÔÚÌØÕ÷¼¯ºÏÖĞµÄĞĞ
-    ' £¨´ÓÏÂÍùÉÏÉ¾±ÜÃâĞĞºÅÆ«ÒÆÎÊÌâ£©
-    '---------------------------------------------------------
-    Dim deleteCount As Long
-    deleteCount = 0
-    
-    For i = lastRow To 2 Step -1
-        akVal = Trim(CStr(ws.Cells(i, "AK").value))
+
+    ' --- é¢„æ‰«æï¼šå°†è¦åˆ é™¤çš„è¡Œæ•° + é£é™©è¡Œæ•°ï¼ˆå‘½ä¸­ç‰¹å¾ä½† W<>"å¦"ï¼‰---
+    Dim willDelete As Long, riskRows As Long
+    willDelete = 0: riskRows = 0
+    For i = 2 To lastRow
+        akVal = Trim$(CStr(ws.Cells(i, "AK").Value))
         If akVal <> "" And featureDict.Exists(akVal) Then
-            ws.Rows(i).Delete
-            deleteCount = deleteCount + 1
+            willDelete = willDelete + 1
+            If Trim$(CStr(ws.Cells(i, "W").Value)) <> "å¦" Then riskRows = riskRows + 1
         End If
     Next i
-    
-    '---------------------------------------------------------
-    ' µÚÈı²½£ºWÁĞ="ÊÇ" µÄĞĞ£¬QÁĞÊıÖµÈ¡·´£¨¸ÄÎª¸ºÊı£©
-    '---------------------------------------------------------
+
+    ' --- ç¬¬äºŒæ­¥ï¼šåˆ é™¤ï¼ˆå…ˆå¼¹é¢„è§ˆç¡®è®¤ï¼‰---
+    Dim deleteCount As Long
+    deleteCount = 0
+    If willDelete > 0 Then
+        Dim confirm As VbMsgBoxResult
+        confirm = MsgBox("å³å°†æŒ‰å‚è€ƒå·(AK)åˆ é™¤ " & willDelete & " è¡Œã€‚" & vbCrLf & _
+                         "å…¶ä¸­ " & riskRows & " è¡Œçš„ã€Œé€€è´§é¡¹ç›®ã€ä¸ä¸ºâ€œå¦â€ï¼ˆå¯èƒ½æ˜¯æ­£å¸¸è¡Œï¼‰ã€‚" & vbCrLf & vbCrLf & _
+                         "ç¡®è®¤åˆ é™¤ï¼Ÿ", vbYesNo + vbExclamation, "åˆ é™¤é¢„è§ˆ")
+        If confirm = vbYes Then
+            For i = lastRow To 2 Step -1
+                akVal = Trim$(CStr(ws.Cells(i, "AK").Value))
+                If akVal <> "" And featureDict.Exists(akVal) Then
+                    ws.Rows(i).Delete
+                    deleteCount = deleteCount + 1
+                End If
+            Next i
+        Else
+            deleteCount = 0
+        End If
+    End If
+
+    ' --- ç¬¬ä¸‰æ­¥ï¼šW="æ˜¯" çš„è¡Œï¼ŒQ é‡‘é¢å–è´Ÿ ---
     Dim negCount As Long
     negCount = 0
-    
-    ' ÖØĞÂ»ñÈ¡É¾³ıºóµÄ×îºóÒ»ĞĞ
     lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
-    
     For i = 2 To lastRow
-        If Trim(ws.Cells(i, "W").value) = "ÊÇ" Then
-            If IsNumeric(ws.Cells(i, "Q").value) And ws.Cells(i, "Q").value <> "" Then
-                ' Èç¹ûÒÑ¾­ÊÇ¸ºÊıÔòÌø¹ı£¬Ö»¶ÔÕıÊı»òÁãÈ¡·´
-                If CDbl(ws.Cells(i, "Q").value) >= 0 Then
-                    ws.Cells(i, "Q").value = -CDbl(ws.Cells(i, "Q").value)
+        If Trim$(CStr(ws.Cells(i, "W").Value)) = "æ˜¯" Then
+            If IsNumeric(ws.Cells(i, "Q").Value) And ws.Cells(i, "Q").Value <> "" Then
+                If CDbl(ws.Cells(i, "Q").Value) >= 0 Then
+                    ws.Cells(i, "Q").Value = -CDbl(ws.Cells(i, "Q").Value)
                     negCount = negCount + 1
                 End If
             End If
         End If
     Next i
-    
+
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
-    
-    MsgBox "´¦ÀíÍê³É£¡" & vbCrLf & _
-           "Step1 ÊÕ¼¯ÌØÕ÷Êı£º" & step1Count & vbCrLf & _
-           "Step2 É¾³ıĞĞÊı£º" & deleteCount & vbCrLf & _
-           "Step3 QÁĞÈ¡·´ĞĞÊı£º" & negCount, _
-           vbInformation, "Ö´ĞĞ½á¹û"
-           
+
+    MsgBox "å¤„ç†å®Œæˆï¼" & vbCrLf & _
+           "Step1 æ”¶é›†ç‰¹å¾æ•°ï¼š" & step1Count & vbCrLf & _
+           "Step2 åˆ é™¤è¡Œæ•°ï¼š" & deleteCount & vbCrLf & _
+           "Step3 Qåˆ—å–åè¡Œæ•°ï¼š" & negCount, vbInformation, "æ‰§è¡Œç»“æœ"
+
     Set featureDict = Nothing
 End Sub
-
