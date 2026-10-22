@@ -124,29 +124,42 @@ Public Function 解析伴生文件(logicalName As String, suggestedName As Strin
 End Function
 
 ' 弹出单选文件框；取消返回 ""
+' 使用 Application.GetOpenFilename —— WPS ET / Excel 均支持（FileDialog 在 WPS 不可用）
+' 注意：GetOpenFilename 没有 FileName/InitialFileName 参数；起始目录用 ChDir 临时切换。
+' 位置参数调用（不用命名参数），最大化 WPS 兼容性。
 Public Function 选择文件(suggestedName As String, startDir As String) As String
-    Dim fd As FileDialog, guess As String
-    Set fd = Application.FileDialog(msoFileDialogFilePicker)
-    fd.AllowMultiSelect = False
-    fd.Filters.Clear
-    fd.Title = "请选择伴生文件：" & suggestedName
-    fd.ButtonText = "选择"
+    Dim guessDir As String, oldDir As String, result As Variant
 
-    guess = ""
+    guessDir = ""
     If Len(startDir) > 0 Then
-        If Dir(startDir, vbDirectory) <> "" Then
-            If Len(suggestedName) > 0 Then
-                If Dir(startDir & "\" & suggestedName) <> "" Then guess = startDir & "\" & suggestedName
-            End If
-            If guess = "" Then fd.InitialFileName = startDir & "\"
-        End If
+        If Dir(startDir, vbDirectory) <> "" Then guessDir = startDir
     End If
-    If guess <> "" Then fd.InitialFileName = guess
+    If guessDir = "" Then
+        On Error Resume Next
+        guessDir = ThisWorkbook.Path
+        On Error GoTo 0
+    End If
 
-    If fd.Show = -1 Then
-        选择文件 = fd.SelectedItems(1)
-    Else
+    oldDir = CurDir
+    If Len(guessDir) > 0 Then
+        On Error Resume Next
+        ChDir guessDir
+        On Error GoTo 0
+    End If
+
+    result = Application.GetOpenFilename( _
+        "Excel 文件 (*.xls*),*.xlsx;*.xls;*.xlsm;*.xlam,所有文件 (*.*),*.*", _
+        , _
+        "请选择伴生文件：" & suggestedName)
+
+    On Error Resume Next
+    If Len(oldDir) > 0 Then ChDir oldDir
+    On Error GoTo 0
+
+    If VarType(result) = vbBoolean Then   ' 用户取消 → False (Boolean)
         选择文件 = ""
+    Else
+        选择文件 = CStr(result)
     End If
 End Function
 
