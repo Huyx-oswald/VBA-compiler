@@ -94,18 +94,24 @@ Sub 清洗库龄表数据()
     Dim seg8Qty As Double, seg8Amt As Double
     Dim seg9Qty As Double, seg9Amt As Double
     Dim totalQty As Double, totalAmt As Double
+    ' 性能优化：整块读入 A..AG(列33) 内存数组后遍历，结果先在内存二维数组拼好再一次性写回
+    ' （2万行原约 24万次逐格 COM 往返 -> 1 次整块读 + 1 次整块写）
+    Dim data As Variant
+    Dim outArr As Variant
+    data = ws.Range("A1:AG" & lastRow).Value
+    ReDim outArr(2 To lastRow, 1 To 2)
     For i = 2 To lastRow
-        sGroupDesc = CStr(ws.Cells(i, 9).Value)   ' 物料组描述
-        firstChar = Left$(CStr(ws.Cells(i, 3).Value), 1)
+        sGroupDesc = CStr(data(i, 9))   ' 物料组描述
+        firstChar = Left$(CStr(data(i, 3)), 1)
 
-        seg6Qty = SafeCDbl(ws.Cells(i, 26).Value)
-        seg6Amt = SafeCDbl(ws.Cells(i, 27).Value)
-        seg7Qty = SafeCDbl(ws.Cells(i, 28).Value)
-        seg7Amt = SafeCDbl(ws.Cells(i, 29).Value)
-        seg8Qty = SafeCDbl(ws.Cells(i, 30).Value)
-        seg8Amt = SafeCDbl(ws.Cells(i, 31).Value)
-        seg9Qty = SafeCDbl(ws.Cells(i, 32).Value)
-        seg9Amt = SafeCDbl(ws.Cells(i, 33).Value)
+        seg6Qty = SafeCDbl(data(i, 26))
+        seg6Amt = SafeCDbl(data(i, 27))
+        seg7Qty = SafeCDbl(data(i, 28))
+        seg7Amt = SafeCDbl(data(i, 29))
+        seg8Qty = SafeCDbl(data(i, 30))
+        seg8Amt = SafeCDbl(data(i, 31))
+        seg9Qty = SafeCDbl(data(i, 32))
+        seg9Amt = SafeCDbl(data(i, 33))
 
         ' 严格保留原语义：仅当对应合计 >0 才写入，否则写 0
         If 呆滞豁免(firstChar) Then
@@ -123,9 +129,12 @@ Sub 清洗库龄表数据()
                 totalQty = 0: totalAmt = 0
             End If
         End If
-        ws.Cells(i, 14).Value = totalQty
-        ws.Cells(i, 15).Value = totalAmt
+        outArr(i, 1) = totalQty
+        outArr(i, 2) = totalAmt
     Next i
+
+    ' 呆滞数量=第14列(N)、呆滞金额=第15列(O)，整块写回
+    ws.Range("N2:O" & lastRow).Value = outArr
 
     Application.ScreenUpdating = True
     MsgBox "库龄表数据清洗完成！共处理 " & (lastRow - 1) & " 行数据。", vbInformation, "完成"

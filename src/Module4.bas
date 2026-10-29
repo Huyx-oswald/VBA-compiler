@@ -115,9 +115,11 @@ Private Sub 设置标题行(ws As Worksheet)
 End Sub
 
 ' 按物料号汇总数据
+' 性能优化：整块读入内存数组后遍历，避免逐格 COM 往返（2万行原需 ~27万次读取）
 Private Sub 汇总数据(ws As Worksheet, dict As Object)
     Dim lastRow As Long
     Dim i As Long
+    Dim data As Variant
     Dim materialCode As Variant
     Dim category As String
     Dim materialDesc As String
@@ -128,24 +130,28 @@ Private Sub 汇总数据(ws As Worksheet, dict As Object)
     Dim stagnantQty As Double
     Dim stagnantAmt As Double
     Dim key As String
+    Dim arr As Variant
 
     lastRow = ws.Cells(ws.Rows.Count, "C").End(xlUp).Row
+    If lastRow < 2 Then Exit Sub
+
+    ' A..O = 列 1..15，正好覆盖本过程用到的最右列(O)
+    data = ws.Range("A1:O" & lastRow).Value
 
     For i = 2 To lastRow
-        materialCode = ws.Cells(i, "C").Value
+        materialCode = data(i, 3)   ' C 物料号
         If materialCode <> "" Then
             key = CStr(materialCode)
-            category = CStr(ws.Cells(i, "B").Value)
-            materialDesc = CStr(ws.Cells(i, "F").Value)
-            unit = CStr(ws.Cells(i, "K").Value)
-            qty = CDbl(Nz(ws.Cells(i, "J").Value, 0))
-            amt = CDbl(Nz(ws.Cells(i, "L").Value, 0))
-            groupDesc = CStr(ws.Cells(i, "I").Value)
-            stagnantQty = CDbl(Nz(ws.Cells(i, "N").Value, 0))
-            stagnantAmt = CDbl(Nz(ws.Cells(i, "O").Value, 0))
+            category = CStr(data(i, 2))    ' B 分类
+            materialDesc = CStr(data(i, 6))  ' F 物料描述
+            unit = CStr(data(i, 11))         ' K 单位
+            qty = CDbl(Nz(data(i, 10), 0))   ' J 数量
+            amt = CDbl(Nz(data(i, 12), 0))   ' L 金额
+            groupDesc = CStr(data(i, 9))     ' I 物料组描述
+            stagnantQty = CDbl(Nz(data(i, 14), 0)) ' N 呆滞数量
+            stagnantAmt = CDbl(Nz(data(i, 15), 0)) ' O 呆滞金额
 
             If dict.Exists(key) Then
-                Dim arr As Variant
                 arr = dict(key)
                 arr(3) = arr(3) + qty
                 arr(4) = arr(4) + amt
@@ -160,88 +166,107 @@ Private Sub 汇总数据(ws As Worksheet, dict As Object)
 End Sub
 
 ' 填充结果表
+' 性能优化：结果先在内存二维数组中拼好（差异/幅度用内存变量，不再回读单元格），最后一次写回
 Private Sub 填充结果表(ws As Worksheet, dict2026 As Object, dict2025 As Object)
     Dim key As Variant
-    Dim rowNum As Long
+    Dim totalRows As Long
+    Dim nOnly2025 As Long
+    Dim outRow As Long
     Dim arr2026 As Variant
     Dim arr2025 As Variant
+    Dim hasBegin As Boolean
+    Dim beginStagQty As Double
+    Dim beginStagAmt As Double
     Dim qtyDiff As Double
     Dim amtDiff As Double
     Dim qtyDiffRate As Variant
     Dim amtDiffRate As Variant
+    Dim outArr As Variant
 
-    rowNum = 2
+    ' 预统计行数：dict2026 全部 + 仅存在于 dict2025 的
+    nOnly2025 = 0
+    For Each key In dict2025.Keys
+        If Not dict2026.Exists(key) Then nOnly2025 = nOnly2025 + 1
+    Next key
+    totalRows = dict2026.Count + nOnly2025
+    If totalRows <= 0 Then Exit Sub
+
+    ReDim outArr(1 To totalRows, 1 To 17)
+    outRow = 0
 
     For Each key In dict2026.Keys
         arr2026 = dict2026(key)
-        ws.Cells(rowNum, 1).Value = key
-        ws.Cells(rowNum, 2).Value = arr2026(0)
-        ws.Cells(rowNum, 3).Value = arr2026(1)
-        ws.Cells(rowNum, 4).Value = arr2026(5)
-        ws.Cells(rowNum, 5).Value = arr2026(2)
-        ws.Cells(rowNum, 6).Value = arr2026(3)
-        ws.Cells(rowNum, 7).Value = arr2026(4)
-        ws.Cells(rowNum, 8).Value = arr2026(6)
-        ws.Cells(rowNum, 9).Value = arr2026(7)
-
-        If dict2025.Exists(key) Then
+        hasBegin = dict2025.Exists(key)
+        If hasBegin Then
             arr2025 = dict2025(key)
-            ws.Cells(rowNum, 10).Value = arr2025(3)
-            ws.Cells(rowNum, 11).Value = arr2025(4)
-            ws.Cells(rowNum, 12).Value = arr2025(6)
-            ws.Cells(rowNum, 13).Value = arr2025(7)
+            beginStagQty = arr2025(6)
+            beginStagAmt = arr2025(7)
         Else
-            ws.Cells(rowNum, 10).Value = 0
-            ws.Cells(rowNum, 11).Value = 0
-            ws.Cells(rowNum, 12).Value = 0
-            ws.Cells(rowNum, 13).Value = 0
+            beginStagQty = 0
+            beginStagAmt = 0
         End If
 
-        qtyDiff = arr2026(6) - ws.Cells(rowNum, 12).Value
-        amtDiff = arr2026(7) - ws.Cells(rowNum, 13).Value
-        ws.Cells(rowNum, 14).Value = qtyDiff
-        ws.Cells(rowNum, 15).Value = amtDiff
+        outRow = outRow + 1
+        outArr(outRow, 1) = key
+        outArr(outRow, 2) = arr2026(0)
+        outArr(outRow, 3) = arr2026(1)
+        outArr(outRow, 4) = arr2026(5)
+        outArr(outRow, 5) = arr2026(2)
+        outArr(outRow, 6) = arr2026(3)
+        outArr(outRow, 7) = arr2026(4)
+        outArr(outRow, 8) = arr2026(6)
+        outArr(outRow, 9) = arr2026(7)
+        If hasBegin Then
+            outArr(outRow, 10) = arr2025(3)
+            outArr(outRow, 11) = arr2025(4)
+        End If
+        outArr(outRow, 12) = beginStagQty
+        outArr(outRow, 13) = beginStagAmt
 
-        If ws.Cells(rowNum, 12).Value <> 0 Then
-            qtyDiffRate = qtyDiff / ws.Cells(rowNum, 12).Value
+        qtyDiff = arr2026(6) - beginStagQty
+        amtDiff = arr2026(7) - beginStagAmt
+        outArr(outRow, 14) = qtyDiff
+        outArr(outRow, 15) = amtDiff
+
+        If beginStagQty <> 0 Then
+            qtyDiffRate = qtyDiff / beginStagQty
         Else
             qtyDiffRate = IIf(qtyDiff = 0, 0, "#DIV/0!")
         End If
-
-        If ws.Cells(rowNum, 13).Value <> 0 Then
-            amtDiffRate = amtDiff / ws.Cells(rowNum, 13).Value
+        If beginStagAmt <> 0 Then
+            amtDiffRate = amtDiff / beginStagAmt
         Else
             amtDiffRate = IIf(amtDiff = 0, 0, "#DIV/0!")
         End If
-
-        ws.Cells(rowNum, 16).Value = qtyDiffRate
-        ws.Cells(rowNum, 17).Value = amtDiffRate
-        rowNum = rowNum + 1
+        outArr(outRow, 16) = qtyDiffRate
+        outArr(outRow, 17) = amtDiffRate
     Next key
 
     For Each key In dict2025.Keys
         If Not dict2026.Exists(key) Then
             arr2025 = dict2025(key)
-            ws.Cells(rowNum, 1).Value = key
-            ws.Cells(rowNum, 2).Value = arr2025(0)
-            ws.Cells(rowNum, 3).Value = arr2025(1)
-            ws.Cells(rowNum, 4).Value = arr2025(5)
-            ws.Cells(rowNum, 5).Value = arr2025(2)
-            ws.Cells(rowNum, 6).Value = 0
-            ws.Cells(rowNum, 7).Value = 0
-            ws.Cells(rowNum, 8).Value = 0
-            ws.Cells(rowNum, 9).Value = 0
-            ws.Cells(rowNum, 10).Value = arr2025(3)
-            ws.Cells(rowNum, 11).Value = arr2025(4)
-            ws.Cells(rowNum, 12).Value = arr2025(6)
-            ws.Cells(rowNum, 13).Value = arr2025(7)
-            ws.Cells(rowNum, 14).Value = -arr2025(6)
-            ws.Cells(rowNum, 15).Value = -arr2025(7)
-            ws.Cells(rowNum, 16).Value = -1
-            ws.Cells(rowNum, 17).Value = -1
-            rowNum = rowNum + 1
+            outRow = outRow + 1
+            outArr(outRow, 1) = key
+            outArr(outRow, 2) = arr2025(0)
+            outArr(outRow, 3) = arr2025(1)
+            outArr(outRow, 4) = arr2025(5)
+            outArr(outRow, 5) = arr2025(2)
+            outArr(outRow, 6) = 0
+            outArr(outRow, 7) = 0
+            outArr(outRow, 8) = 0
+            outArr(outRow, 9) = 0
+            outArr(outRow, 10) = arr2025(3)
+            outArr(outRow, 11) = arr2025(4)
+            outArr(outRow, 12) = arr2025(6)
+            outArr(outRow, 13) = arr2025(7)
+            outArr(outRow, 14) = -arr2025(6)
+            outArr(outRow, 15) = -arr2025(7)
+            outArr(outRow, 16) = -1
+            outArr(outRow, 17) = -1
         End If
     Next key
+
+    ws.Range("A2:Q" & (outRow + 1)).Value = outArr
 End Sub
 
 ' 按差异金额倒序排序
